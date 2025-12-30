@@ -67,7 +67,7 @@ function ForgotPassword() {
                 </div>
                 <div className="text-xl text-[#5DBA46] font-bold mb-10 pt-10">Password anda berhasil diubah</div>
                 <div className='w-full flex justify-center items-center'>
-                  <Button type="submit" className="mt-6 bg-[#438196] h-12 mb-10 w-[50%]" fullWidth>
+                  <Button type="submit" className="mt-6 bg-[#56b4e6] h-12 mb-10 w-[50%]" fullWidth>
                     Ubah Password
                   </Button>
                 </div>
@@ -89,7 +89,7 @@ function ForgotPassword() {
                 </div>
                 <br />
                 <div className='text-base text-[#A4A4A4] text-start mb-2 mt-10'>
-                    Masukkan Kode OTP, yang dikirim via email
+                  Masukkan Kode OTP, yang dikirim via email
                 </div>
                 <div className="mb-1 flex justify-between">
                   {otp.map((data, index) => {
@@ -98,7 +98,7 @@ function ForgotPassword() {
                         key={index}
                         type="text"
                         maxLength="1"
-                        className="otp-input peer block w-12 h-16 rounded bg-transparent text-center px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder-opacity-100 peer-focus:text-primary placeholder-opacity-0 motion-reduce:transition-none dark:text-white dark:placeholder:text-neutral-300 dark:autofill:shadow-autofill dark:peer-focus:text-primary border border-[#438196]"
+                        className="otp-input peer block w-12 h-16 rounded bg-transparent text-center px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder-opacity-100 peer-focus:text-primary placeholder-opacity-0 motion-reduce:transition-none dark:text-white dark:placeholder:text-neutral-300 dark:autofill:shadow-autofill dark:peer-focus:text-primary border border-[#56b4e6]"
                         value={data}
                         onChange={(e) => handleOtpChange(e.target, index)}
                         ref={el => refs.current[index] = el}
@@ -107,7 +107,7 @@ function ForgotPassword() {
                   })}
                 </div>
                 <br />
-                <Button type="submit" className="mt-6 bg-[#438196] h-12" fullWidth>
+                <Button type="submit" className="mt-6 bg-[#56b4e6] h-12" fullWidth>
                   Verifikasi OTP
                 </Button>
                 <div className="flex justify-center items-center mt-6">
@@ -132,7 +132,7 @@ function ForgotPassword() {
                     <div className="relative mb-8">
                       <input
                         type="email"
-                        className="peer block w-full min-h-[auto] rounded bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder-opacity-100 peer-focus:text-primary placeholder-opacity-0 motion-reduce:transition-none dark:text-white dark:placeholder:text-neutral-300 dark:autofill:shadow-autofill dark:peer-focus:text-primary border border-[#438196]"
+                        className="peer block w-full min-h-[auto] rounded bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder-opacity-100 peer-focus:text-primary placeholder-opacity-0 motion-reduce:transition-none dark:text-white dark:placeholder:text-neutral-300 dark:autofill:shadow-autofill dark:peer-focus:text-primary border border-[#56b4e6]"
                         id="email"
                         placeholder="Masukkan email akun anda"
                       />
@@ -144,15 +144,15 @@ function ForgotPassword() {
                       </label>
                       <div className="w-full flex justify-end items-end">
                         <div className='text-[#757575] font-semibold mt-2'>
-                          Sudah punya akun? <span className='ml-1 text-[#FDB739] font-semibold cursor-pointer'><Link to="/auth/sign-in" className=" ml-1">Masuk</Link></span>
+                          Sudah punya akun? <span className='ml-1 text-[#fcb439] font-semibold cursor-pointer'><Link to="/auth/sign-in" className=" ml-1">Masuk</Link></span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <Button type="submit" className="mt-6 bg-[#438196] h-12" fullWidth>
+                  <Button type="submit" className="mt-6 bg-[#56b4e6] h-12" fullWidth>
                     Kirim OTP
                   </Button>
-                  <Button className="mt-6 mb-8 bg-transparent border border-[#FDB739] text-[#FDB739] h-12" fullWidth>
+                  <Button className="mt-6 mb-8 bg-transparent border border-[#fcb439] text-[#fcb439] h-12" fullWidth>
                     Login Via Google
                   </Button>
                   <div className="flex justify-center items-center">
