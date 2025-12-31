@@ -151,13 +151,14 @@ function DetailPesanan() {
   const statusConfig = {
     // Use one solid bright blue for all statuses (no hover/animation)
     // bg: solid blue, border: slightly darker blue, text: white
-    'menunggu pembayaran': { color: 'info', text: 'Menunggu Pembayaran', bg: 'bg-blue-500', border: 'border-blue-600', textColor: 'text-white' },
-    'belum dibayar': { color: 'info', text: 'Belum Dibayar', bg: 'bg-blue-500', border: 'border-blue-600', textColor: 'text-white' },
-    'paid': { color: 'info', text: 'Sudah Dibayar', bg: 'bg-blue-500', border: 'border-blue-600', textColor: 'text-white' },
-    'dikirim': { color: 'info', text: 'Dikirim', bg: 'bg-blue-500', border: 'border-blue-600', textColor: 'text-white' },
-    'selesai': { color: 'info', text: 'Selesai', bg: 'bg-blue-500', border: 'border-blue-600', textColor: 'text-white' },
-    'dibatalkan': { color: 'info', text: 'Dibatalkan', bg: 'bg-blue-500', border: 'border-blue-600', textColor: 'text-white' },
-    'pengembalian dana': { color: 'info', text: 'Pengembalian Dana', bg: 'bg-blue-500', border: 'border-blue-600', textColor: 'text-white' }
+    'menunggu pembayaran': { color: 'info', text: 'Menunggu Pembayaran', bg: 'bg-orange-500', border: 'border-orange-600', textColor: 'text-white' },
+    'belum dibayar': { color: 'info', text: 'Belum Dibayar', bg: 'bg-gray-500', border: 'border-gray-600', textColor: 'text-white' },
+    'paid': { color: 'info', text: 'Menunggu Konfirmasi', bg: 'bg-green-500', border: 'border-green-600', textColor: 'text-white' },
+    'diproses': { color: 'info', text: 'Sedang Disiapkan', bg: 'bg-blue-500', border: 'border-blue-600', textColor: 'text-white' },
+    'dikirim': { color: 'info', text: 'Dalam Pengiriman', bg: 'bg-purple-500', border: 'border-purple-600', textColor: 'text-white' },
+    'selesai': { color: 'info', text: 'Selesai', bg: 'bg-gray-600', border: 'border-gray-700', textColor: 'text-white' },
+    'dibatalkan': { color: 'info', text: 'Dibatalkan', bg: 'bg-red-500', border: 'border-red-600', textColor: 'text-white' },
+    'pengembalian dana': { color: 'info', text: 'Pengembalian Dana', bg: 'bg-red-500', border: 'border-red-600', textColor: 'text-white' }
   };
 
   // Prefer item-level / order-level "status_pesanan" when present, otherwise fallback to status_transaksi
@@ -165,21 +166,46 @@ function DetailPesanan() {
   const rawStatus = String(rawStatusCandidate).toLowerCase().trim();
 
   // Normalize common status variants to keys used in statusConfig
-  const normalizeStatusKey = (s) => {
+  const normalizeStatusKey = (s, order) => {
+    // 0. Check explicit current_status ID from backend response
+    if (order?.current_status?.id_status) {
+      const id = order.current_status.id_status;
+      if (id === 1) return 'menunggu pembayaran';
+      if (id === 3) return 'paid';
+      if (id === 5) return 'diproses';
+      if (id === 7) return 'dikirim';
+      if (id === 9) return 'selesai';
+      if (id === 19 || id === 21) return 'dibatalkan';
+    }
+
     if (!s) return 'belum dibayar';
-    if (s.includes('dikirim')) return 'dikirim';
-    if (s.includes('disiapkan')) return 'disiapkan';
-    if (s.includes('selesai')) return 'selesai';
-    if (s.includes('dibatalkan')) return 'dibatalkan';
-    if (s.includes('pengembalian')) return 'pengembalian dana';
-    // treat any variation containing 'dibayar' or 'telah dibayar' as paid
-    if (s.includes('dibayar')) return 'paid';
-    if (s.includes('menunggu')) return 'menunggu pembayaran';
+    const str = String(s).toLowerCase().trim();
+
+    // 1. Check Exact Numeric IDs (Priority) - Fallback if current_status not available
+    if (str === '1') return 'menunggu pembayaran';
+    if (str === '3') return 'paid';
+    if (str === '5') return 'diproses';
+    if (str === '7') return 'dikirim';
+    if (str === '9') return 'selesai';
+    if (str === '19' || str === '21') return 'dibatalkan';
+
+    // 2. String matching
+    if (str.includes('selesai')) return 'selesai';
+    if (str.includes('dikirim')) return 'dikirim';
+    if (str.includes('disiapkan') || str.includes('diproses')) return 'diproses';
+    if (str.includes('dibatalkan') || str.includes('batal') || str.includes('refund') || str.includes('pengembalian')) return 'dibatalkan';
+
+    // ID 3: PAID / Menunggu Konfirmasi (Seller side)
+    if (str === 'paid' || str.includes('telah dibayar') || str.includes('menunggu konfirmasi') || str.includes('sudah dibayar')) return 'paid';
+
+    // ID 1: BOOKED / Menunggu Pembayaran
+    if (str.includes('menunggu')) return 'menunggu pembayaran';
+
     // fallback
     return 'belum dibayar';
   };
 
-  const normalizedKey = normalizeStatusKey(rawStatus);
+  const normalizedKey = normalizeStatusKey(rawStatus, orderData);
   const status = statusConfig[normalizedKey] || statusConfig['belum dibayar'];
 
   // Konfirmasi Pesanan handlers (Terima)
@@ -261,43 +287,36 @@ function DetailPesanan() {
       selesai: false
     };
 
-    // Consider status_pesanan first, then status_transaksi
+    // Use normalized key which now prioritizes ID
     const statusCandidate = (order?.status_pesanan || order?.status_transaksi || '') || '';
     const statusLower = String(statusCandidate).toLowerCase().trim();
-    const statusKey = normalizeStatusKey(statusLower);
+    const key = normalizeStatusKey(statusLower, order);
 
-    // also consider per-item status (e.g., details[].status_pesanan)
-    const hasDetailDisiapkan = Array.isArray(order?.details) && order.details.some(d => ((d.status_pesanan || '').toLowerCase().trim() === 'disiapkan' || (d.status_pesanan || '').toLowerCase().includes('disiapkan')));
-    const hasDetailDikirimLocal = Array.isArray(order?.details) && order.details.some(d => ((d.status_pesanan || '').toLowerCase().includes('dikirim')));
-    const hasHistoryDikirimLocal = Array.isArray(order?.history) && order.history.some(h => (String(h.status || '').toLowerCase().includes('dikirim')));
-
-    // Determine button permissions using normalized key and raw text checks for variants
-    if (statusLower.includes('belum dibayar') || statusLower.includes('menunggu')) {
-      // no actions
-    } else if (statusLower.includes('dibayar') || statusKey === 'paid') {
+    // Strict Stage Check by ID/Key
+    if (key === 'paid') {
+      // Stage 1: Paid (ID 3) -> Seller can Accept/Reject
       states.terima = true;
       states.tolak = true;
-    } else if (statusLower.includes('diterima') || statusLower.includes('diproses')) {
+      states.kirim = false;
+      states.selesai = false;
+    } else if (key === 'diproses') {
+      // Stage 2: Processed (ID 5) -> Seller can Ship
       states.kirim = true;
-    } else if (statusLower.includes('disiapkan') || statusKey === 'disiapkan') {
-      states.kirim = true;
-    } else if (statusLower.includes('dikirim') || statusKey === 'dikirim') {
-      states.selesai = true;
-    } else if (statusKey === 'selesai') {
-      // final
-    } else if (statusKey === 'dibatalkan' || statusKey === 'pengembalian dana') {
-      // final
-    }
-
-    // If any detail has status 'disiapkan', enable Kirim as well
-    if (hasDetailDisiapkan) states.kirim = true;
-
-    // If order (or history/details) shows 'dikirim', enable Selesai and ensure Terima/Tolak/Kirim are disabled
-    if (statusLower.includes('dikirim') || statusKey === 'dikirim' || hasDetailDikirimLocal || hasHistoryDikirimLocal) {
-      states.selesai = true;
+      states.terima = false;
+      states.tolak = false;
+      states.selesai = false;
+    } else if (key === 'dikirim') {
+      // Stage 3: Shipped (ID 7) -> Waiting for Buyer
+      states.selesai = false;
       states.kirim = false;
       states.terima = false;
       states.tolak = false;
+    } else {
+      // All other states (Selesai, Dibatalkan, Menunggu Pembayaran) -> Disable All
+      states.terima = false;
+      states.tolak = false;
+      states.kirim = false;
+      states.selesai = false;
     }
 
     return states;
@@ -305,12 +324,12 @@ function DetailPesanan() {
 
   const buttonStates = orderData ? getButtonStates(orderData) : {};
 
-  // Determine if the order (or any item) has been shipped. If so, show a disabled "Sudah dikirim" button.
+  // Determine if the order (or any item) has been shipped.
   const hasDetailDikirim = Array.isArray(orderData?.details) && orderData.details.some(d => ((d.status_pesanan || '').toLowerCase().includes('dikirim')));
   const hasHistoryDikirim = Array.isArray(orderData?.history) && orderData.history.some(h => (String(h.status || '').toLowerCase().includes('dikirim')));
-  const isDikirim = normalizedKey === 'dikirim' || hasDetailDikirim || hasHistoryDikirim;
+  const isDikirim = normalizedKey === 'dikirim' || normalizedKey === 'selesai' || hasDetailDikirim || hasHistoryDikirim;
 
-  // Final disabled state for the Kirim button: disabled if already shipped or not allowed by buttonStates
+  // Final disabled state
   const kirimDisabled = isDikirim || !buttonStates.kirim;
 
   if (loading) {
@@ -347,7 +366,8 @@ function DetailPesanan() {
   const ppnNominal = orderData.ppn_nominal || 0;
   const biayaAsuransi = orderData.biaya_asuransi || 0;
   const penggunaanKoin = orderData.penggunaan_koin || 0;
-  const grandTotal = orderData.total_tagihan || 0;
+  const biayaLayanan = orderData.biaya_layanan || 0;
+  const grandTotal = orderData.total_pembayaran || orderData.total_tagihan || 0;
 
   return (
     <div className="mb-8">
@@ -695,7 +715,14 @@ function DetailPesanan() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Alamat Lengkap</p>
-                  <p className="text-sm text-gray-700 leading-relaxed">{orderData.alamat_pengiriman || '-'}</p>
+                  <p className="text-sm text-gray-700 leading-relaxed font-semibold">{orderData.alamat_pengiriman || '-'}</p>
+                  {orderData.detail_alamat && (
+                    <div className="mt-1 text-xs text-gray-600 space-y-0.5 border-l-2 border-gray-300 pl-2">
+                      <p>{orderData.detail_alamat.kelurahan}, {orderData.detail_alamat.kecamatan}</p>
+                      <p>{orderData.detail_alamat.kota}</p>
+                      <p>{orderData.detail_alamat.provinsi} - {orderData.detail_alamat.kode_pos}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -708,8 +735,8 @@ function DetailPesanan() {
                   <h3 className="font-bold text-sm text-gray-800">Pengiriman</h3>
                 </div>
                 <p className="text-base font-bold text-gray-900">{orderData.pengiriman || '-'}</p>
-                {orderData.resi && (
-                  <p className="text-xs text-gray-600 mt-1">Resi: <span className="font-semibold">{orderData.resi}</span></p>
+                {orderData.code_pengiriman && (
+                  <p className="text-xs text-gray-600 mt-1">Resi: <span className="font-semibold">{orderData.code_pengiriman}</span></p>
                 )}
               </div>
 
@@ -846,6 +873,14 @@ function DetailPesanan() {
                       <span className="text-gray-600">Penggunaan Koin</span>
                       <span className="font-semibold text-red-600">
                         - Rp {penggunaanKoin.toLocaleString('id-ID')}
+                      </span>
+                    </div>
+                  )}
+                  {biayaLayanan > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Biaya Layanan</span>
+                      <span className="font-semibold text-gray-900">
+                        Rp {biayaLayanan.toLocaleString('id-ID')}
                       </span>
                     </div>
                   )}

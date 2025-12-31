@@ -9,28 +9,41 @@ import Semua from "./Tabs/Semua";
 function StatusPill({ status }) {
   const s = String(status || '').toLowerCase();
   // normalize common variants
-  const isDibayar = s.includes('dibayar');
+  const isDibayar = s.includes('paid') || s.includes('dibayar');
   const isMenunggu = s.includes('menunggu');
-  const isSelesai = s.includes('selesai') || s.includes('dikirim');
-  const isDibatalkan = s.includes('batal') || s.includes('dibatalkan');
+  const isDiproses = s.includes('diproses') || s.includes('disiapkan');
+  const isDikirim = s.includes('dikirim');
+  const isSelesai = s.includes('selesai'); // Strict selesai
+  const isDibatalkan = s.includes('batal') || s.includes('dibatalkan') || s.includes('refund') || s.includes('pengembalian');
 
   let base = 'bg-gray-100 text-gray-800 border-gray-200';
   let label = status || '';
   let dotClass = 'w-2 h-2 rounded-full bg-current/80';
 
   if (isDibayar) {
-    base = 'bg-blue-500 text-white border-blue-600 shadow-md';
-    label = 'Telah dibayar';
-    dotClass = 'w-2 h-2 rounded-full bg-white';
+    base = 'bg-green-100 text-green-800 border-green-200';
+    label = 'Menunggu Konfirmasi';
+    dotClass = 'w-2 h-2 rounded-full bg-green-500';
   } else if (isMenunggu) {
-    base = 'bg-yellow-100 text-yellow-900 border-yellow-300 shadow-sm';
+    base = 'bg-orange-100 text-orange-900 border-orange-200';
     label = 'Menunggu Pembayaran';
+    dotClass = 'w-2 h-2 rounded-full bg-orange-500';
+  } else if (isDiproses) {
+    base = 'bg-blue-100 text-blue-800 border-blue-200';
+    label = 'Perlu Dikirim';
+    dotClass = 'w-2 h-2 rounded-full bg-blue-500';
+  } else if (isDikirim) {
+    base = 'bg-purple-100 text-purple-800 border-purple-200';
+    label = 'Dalam Pengiriman';
+    dotClass = 'w-2 h-2 rounded-full bg-purple-500';
   } else if (isSelesai) {
-    base = 'bg-cyan-100 text-cyan-900 border-cyan-300 shadow-sm';
-    label = 'Sudah Dikirim';
+    base = 'bg-gray-100 text-gray-600 border-gray-300';
+    label = 'Selesai';
+    dotClass = 'w-2 h-2 rounded-full bg-gray-400';
   } else if (isDibatalkan) {
-    base = 'bg-red-100 text-red-900 border-red-300 shadow-sm';
-    label = 'Batal';
+    base = 'bg-red-100 text-red-900 border-red-300'; // Keep alert style
+    label = 'Dibatalkan';
+    dotClass = 'w-2 h-2 rounded-full bg-red-500';
   }
 
   return (
@@ -48,10 +61,12 @@ function Pesanan() {
 
   const statusOptions = [
     { value: "", label: "Semua Status", color: "gray" },
-    { value: "menunggu pembayaran", label: "Menunggu Pembayaran", color: "amber" },
-    { value: "paid", label: "Sudah Dibayar", color: "green" },
-    { value: "selesai", label: "Sudah Dikirim", color: "cyan" },
-    { value: "dibatalkan", label: "Kadaluwarsa", color: "red" },
+    { value: "menunggu", label: "Menunggu Pembayaran", color: "orange" },
+    { value: "paid", label: "Menunggu Konfirmasi", color: "green" },
+    { value: "diproses", label: "Perlu Dikirim", color: "blue" },
+    { value: "dikirim", label: "Dalam Pengiriman", color: "purple" },
+    { value: "selesai", label: "Selesai", color: "gray" },
+    { value: "dibatalkan", label: "Dibatalkan", color: "red" },
   ];
 
   return (
