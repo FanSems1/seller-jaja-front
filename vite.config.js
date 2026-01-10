@@ -5,7 +5,7 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    // keep existing aliases and ensure React is deduped to the project's copy
+    // keep existing aliases and React is deduped to the project's copy
     alias: [
       { find: "@", replacement: "/src" },
       { find: "react", replacement: path.resolve(__dirname, "node_modules/react") },
