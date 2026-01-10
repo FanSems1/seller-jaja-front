@@ -1,0 +1,66 @@
+name: Frontend Deploy Seller Jaja
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build with Vite
+        run: npx vite build
+
+      # 1️⃣ Siapkan folder sementara di server
+      - name: Prepare temp folder on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: jaja
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            mkdir -p /tmp/new_build
+            mkdir -p /home/jaja/seller-jaja/dist
+
+      # 2️⃣ Upload hasil build ke /tmp
+      - name: Upload build to temp folder
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: jaja
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          source: "dist/"
+          target: "/tmp/new_build"
+
+      # 3️⃣ Deploy TANPA menimpa assets
+      - name: Deploy without overwriting assets
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: jaja
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            echo "Remove old files except assets"
+            find /home/jaja/seller-jaja/dist -mindepth 1 ! -name assets -exec rm -rf {} +
+
+            echo "Copy new build except assets"
+            rsync -av --exclude=assets /tmp/new_build/dist/ /home/jaja/seller-jaja/dist/
+
+            echo "Cleanup temp folder"
+            rm -rf /tmp/new_build
