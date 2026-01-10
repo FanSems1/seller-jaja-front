@@ -17,6 +17,24 @@ import { ThemeProvider } from "@material-tailwind/react";
 import { MaterialTailwindControllerProvider } from "@/context";
 import "../public/css/tailwind.css";
 
+// Best-effort unregister any stale service workers and clear caches on our
+// production hostname so clients don't keep a cached index.html that points
+// to asset filenames that no longer exist (common cause of 404s after deploy).
+try {
+  if (typeof window !== "undefined" && typeof navigator !== "undefined" && 'serviceWorker' in navigator) {
+    if (location && location.hostname === 'seller.jaja.id') {
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        regs.forEach(function (r) { r.unregister(); });
+      }).catch(function () { /* ignore */ });
+      if (window.caches && window.caches.keys) {
+        caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
+      }
+    }
+  }
+} catch (e) {
+  // swallow errors; this is best-effort cleanup
+}
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
