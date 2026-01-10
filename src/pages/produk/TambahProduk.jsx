@@ -455,46 +455,7 @@ function TambahProduk() {
                     setLoading(false);
                 }
             };
-
-            // Normalisasi value agar persis seperti Postman
-const normalizeBool = (val) => val === true || val === 'Y' || val === 'y' ? 'Y' : 'T';
-const normalizeDraft = (val) => val === true || val === 'Y' ? 'Y' : 'T';
-const normalizePreOrder = (val) => val === true || val === 'Y' ? 'Y' : 'T';
-const normalizeStatusPilih = (val) => val === true || val === 'T' ? 'T' : 'Y';
-const normalizeVariasiHarga = (val) => val === true || val === 'Y' ? 'Y' : 'T';
-
-formData.append('pre_order', normalizePreOrder(preOrder));
-formData.append('draft', normalizeDraft(isDraft));
-formData.append('status_pilih', normalizeStatusPilih(statusPilih));
-formData.append('variasi_harga', normalizeVariasiHarga(hasVariasiHarga));
-
-// Etalase: pastikan persis nama
-if (etalase) {
-  const selectedEtalase = etalaseList.find(et => et.id_etalase === etalase);
-  formData.append('etalase', selectedEtalase ? selectedEtalase.nama_etalase : '');
-} else {
-  formData.append('etalase', '');
-}
-
-// Variasi: pastikan format persis seperti Postman
-if (showCard && variasiList.length > 0) {
-  const variasiData = variasiList.map(v => {
-    const item = {};
-    v.tipeVariasiList.forEach(tv => {
-      const tipeLower = tv.tipe.toLowerCase();
-      if (tipeLower === 'warna' && tv.nama) item.warna = tv.nama;
-      if (tipeLower === 'ukuran' && tv.nama) item.ukuran = tv.nama;
-      if (tipeLower === 'model' && tv.nama) item.model = tv.nama;
-    });
-    if (v.harga) item.harga_variasi = String(v.harga);
-    item.stok = String(v.stok || '0');
-    if (v.sku) item.sku = v.sku;
-    return item;
-  });
-  formData.append('variasi', JSON.stringify(variasiData));
-} else {
-  formData.append('variasi', JSON.stringify([]));
-}
+            
 
 // Modal Usulkan Brand
 const [isModalVisible, setIsModalVisible] = useState(false);

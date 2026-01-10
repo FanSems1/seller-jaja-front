@@ -32,6 +32,25 @@
     <!-- Nepcha Analytics (nepcha.com) -->
     <!-- Nepcha is a easy-to-use web analytics. No cookies and fully compliant with GDPR, CCPA and PECR. -->
     <script defer data-site="YOUR_DOMAIN_HERE" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
+    <!--
+      Safety: unregister any old service worker and clear caches on the production
+      hostname to avoid stale cached index/assets causing 404 or MIME errors.
+      This runs only on seller.jaja.id and is intentionally conservative.
+    -->
+    <script>
+      try {
+        if (location.hostname === 'seller.jaja.id' && 'serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function (regs) {
+            regs.forEach(function (r) { r.unregister(); });
+          }).catch(function(){});
+          if (window.caches && window.caches.keys) {
+            caches.keys().then(function(keys){ keys.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
+          }
+        }
+      } catch (e) {
+        // swallow; this is a best-effort cleanup helper
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

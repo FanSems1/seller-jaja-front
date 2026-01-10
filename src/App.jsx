@@ -4,6 +4,7 @@ import { Dashboard, Auth } from "@/layouts";
 import DetailPesanan from './pages/penjualan/DetailPesanan';
 import EditProduk from './pages/produk/daftar-produk/EditProduk';
 import DetailProduk from './pages/produk/DetailProduk';
+import TambahProduk from './pages/produk/TambahProduk';
 import DetailVoucher from './pages/promosi/DetailVoucher';
 import TambahVoucher from './pages/promosi/TambahVoucher';
 import DetailRating from './pages/riview/rating-produk/DetailRating';
@@ -26,6 +27,7 @@ function App() {
       }>
   <Route path='pejualan/pesanan/detail-pesanan/:id' element={<DetailPesanan/>}/>
   <Route path='produk/detail/:id' element={<DetailProduk />} />
+  <Route path='produk/tambah-produk' element={<TambahProduk />} />
   <Route path='produk/daftar-produk/edit-produk/:id' element={<EditProduk/>}/>
         <Route path='promosi/DaftarPromosi/EditDetailPromosi' element={<DetailVoucher/>}/>
         <Route path='promosi/daftarr-promosi/tambah-promosi' element={<TambahVoucher/>}/>
