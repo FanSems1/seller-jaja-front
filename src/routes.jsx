@@ -18,6 +18,7 @@ import DetailPesanan from "./pages/penjualan/DetailPesanan";
 import PrintInvoice from "./pages/penjualan/PrintInvoice";
 import DaftarProduk from "./pages/produk/daftar-produk/DaftarProduk";
 import TambahProduk from "./pages/produk/TambahProduk";
+import EditProduk from "./pages/produk/daftar-produk/EditProduk";
 import DaftarBrand from "./pages/produk/DaftarBrand";
 import DaftarEtalase from "./pages/produk/DaftarEtalase";
 import VoucherToko from "./pages/promosi/VoucherToko";
@@ -53,7 +54,7 @@ export const routes = [
       {
         icon: <CurrencyDollarIcon {...icon} />,
         name: "Pesanan",
-        path: "/pejualan/pesanan",
+        path: "/penjualan/pesanan",
         element: <Pesanan />,
       },
 
@@ -65,10 +66,38 @@ export const routes = [
         element: <DaftarProduk />,
       },
       {
+        // route for adding a product (hidden from sidebar)
+        name: "Tambah Produk",
+        path: "/produk/tambah-produk",
+        element: <TambahProduk />,
+        hidden: true,
+      },
+      {
+        // route for editing a product by id (hidden from sidebar)
+        name: "Edit Produk",
+        path: "/produk/daftar-produk/edit-produk/:id",
+        element: <EditProduk />,
+        hidden: true,
+      },
+      {
         icon: <TagIcon {...icon} />,
         name: "Voucher Toko",
         path: "/promosi/voucher-toko",
         element: <VoucherToko />,
+      },
+      {
+        // route for adding a voucher (hidden from sidebar)
+        name: "Tambah Voucher",
+        path: "/promosi/tambah-voucher",
+        element: <TambahVoucher />,
+        hidden: true,
+      },
+      {
+        // route for editing a voucher by id (hidden from sidebar)
+        name: "Edit Voucher",
+        path: "/promosi/edit-voucher/:id",
+        element: <EditVoucher />,
+        hidden: true,
       },
       {
         icon: <WalletIcon {...icon} />,
@@ -93,7 +122,7 @@ export const routes = [
           },          
           {
             name: "Saldo Toko",
-            path: "/dompetku/Saldo_toko",
+            path: "/dompetku/saldo-toko",
             element: <Saldo />,
           },          
         ]
@@ -103,6 +132,13 @@ export const routes = [
         name: "Rating Produk",
         path: "/review/rating-produk",
         element: <RatingProduk />,
+      },
+      {
+        // detail route for a specific product rating (id param) - hidden from sidebar
+        name: "Detail Rating Produk",
+        path: "/review/rating-produk/:id",
+        element: <DetailReview />,
+        hidden: true,
       },
       {
         icon: <Cog6ToothIcon {...icon} />,

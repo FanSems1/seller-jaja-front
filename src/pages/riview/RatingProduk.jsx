@@ -41,7 +41,7 @@ function RatingProduk() {
     
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 10;
+    const [pageSize, setPageSize] = useState(10);
     
     // Stats toko
     const [tokoStats, setTokoStats] = useState({
@@ -113,10 +113,19 @@ function RatingProduk() {
     <div className="mb-8">
             <Card>
       
-          <CardBody>
-            {/* Toko Stats Section */}
-            <div>
-                <div className='w-full flex justify-between items-start gap-8'>
+                    {/* Page header (same style as Pesanan) */}
+                    <div className="px-6 pt-6 pb-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-xl font-bold tracking-tight text-gray-900">Rating Produk</h1>
+                            </div>
+                        </div>
+                    </div>
+
+                    <CardBody>
+                        {/* Toko Stats Section */}
+                        <div className="mb-6">
+                                <div className='w-full flex justify-between items-start gap-8'>
                     {/* Stats Cards - Left Side */}
                     <div className='flex flex-wrap gap-8'>
                         {/* Rating Card */}
@@ -152,7 +161,6 @@ function RatingProduk() {
                 </div>
             </div>
             
-            <hr className="my-6" />
             
             {/* Products Table */}
             <div className='mb-5 overflow-x-auto'>
@@ -168,22 +176,22 @@ function RatingProduk() {
                     <table className="w-full table-auto border-collapse">
                       <thead>
                         <tr className="bg-blue-100">
-                          <th className="border text-center w-20 py-3">No.</th>
-                          <th className="border px-4 py-3">Produk</th>
-                          <th className="border px-4 py-3">
+                          <th className="text-center w-20 py-3">No.</th>
+                          <th className="px-4 py-3">Produk</th>
+                          <th className="px-4 py-3">
                             <div className='flex w-full space-x-2 justify-center items-center'>
                                 Rating <StarIcon className='w-5 h-5'/>
                             </div>
                           </th>
-                          <th className="border px-4 py-3">Jumlah Ulasan</th>
-                          <th className="border px-4 py-3">Aksi</th>
+                          <th className="px-4 py-3">Jumlah Ulasan</th>
+                          <th className="px-4 py-3">Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
                         {paginatedProducts.map((product, index) => (
-                          <tr key={product.id_produk} className="odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition-colors">
-                            <td className="border px-4 py-3 text-center">{(currentPage - 1) * pageSize + index + 1}</td>
-                            <td className="border px-4 py-3">
+                          <tr key={product.id_produk} className="odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition-colors cursor-default">
+                            <td className="px-4 py-3 text-center">{(currentPage - 1) * pageSize + index + 1}</td>
+                            <td className="px-4 py-3">
                                 <div className='flex items-center space-x-4'>
                                     <div className='flex-shrink-0'>
                                         <img 
@@ -210,18 +218,18 @@ function RatingProduk() {
                                     </div>
                                 </div>
                             </td>
-                            <td className="border px-4 py-3">
+                            <td className="px-4 py-3">
                                 <div className='flex flex-col items-center gap-1'>
                                     <span className='font-bold text-base text-gray-700'>{product.average_rating}</span>
                                     <RatingCell rating={parseFloat(product.average_rating)} />
                                 </div>
                             </td>
-                            <td className="border px-4 py-3 text-center">
+                            <td className="px-4 py-3 text-center">
                                 <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800'>
                                     {product.total_reviews} ulasan
                                 </span>
                             </td>
-                            <td className="border px-4 py-3 text-center">
+                            <td className="px-4 py-3 text-center">
                                 <button 
                                     onClick={() => navigate(`/dashboard/review/rating-produk/${product.id_produk}`)}
                                     className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 text-sm rounded-lg transition-colors"
@@ -243,8 +251,12 @@ function RatingProduk() {
                         current={currentPage}
                         total={filteredProducts.length}
                         pageSize={pageSize}
-                        onChange={(page) => setCurrentPage(page)}
-                        showSizeChanger={false}
+                        onChange={(page, newSize) => {
+                            setCurrentPage(page);
+                            if (newSize && newSize !== pageSize) setPageSize(newSize);
+                        }}
+                        showSizeChanger={true}
+                        pageSizeOptions={["10", "50", "100"]}
                         showTotal={(total) => `Total ${total} produk`}
                         size="small"
                     />

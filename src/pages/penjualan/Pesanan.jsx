@@ -73,7 +73,7 @@ function Pesanan() {
     <div className="mb-8">
       <Card>
         {/* Modern Header */}
-        <div className="px-6 pt-6 pb-4 border-b border-gray-200">
+  <div className="px-6 pt-6 pb-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold tracking-tight text-gray-900">
@@ -85,48 +85,36 @@ function Pesanan() {
 
         <CardBody className="p-6">
           {/* Modern Filter Section */}
-          <div className="mb-6">
-            <div className="grid md:grid-cols-3 gap-3">
-              {/* Date Filter */}
+          <div className="mb-4">
+            <div className="grid md:grid-cols-3 gap-3 items-center">
+              {/* Date Filter (compact, no label) */}
               <div className="relative">
-                <label className="flex items-center gap-1.5 text-xs font-medium text-gray-700 mb-1.5">
-                  <CalendarIcon className="w-3.5 h-3.5" />
-                  Filter Tanggal
-                </label>
                 <DatePicker
-                  className="w-full !h-10 !rounded-lg !border-gray-300 hover:!border-blue-400"
-                  placeholder="Pilih tanggal pesanan"
+                  className="w-full !h-8 !rounded-lg !border-gray-300"
+                  placeholder="Tanggal"
                   onChange={(date) => setDateFilter(date)}
                   format="DD/MM/YYYY"
                 />
               </div>
 
-              {/* Status Filter */}
+              {/* Status Filter (compact, no label) */}
               <div className="relative">
-                <label className="flex items-center gap-1.5 text-xs font-medium text-gray-700 mb-1.5">
-                  <FunnelIcon className="w-3.5 h-3.5" />
-                  Filter Status
-                </label>
                 <Select
                   className="w-full"
-                  placeholder="Pilih status pesanan"
+                  placeholder="Status"
                   onChange={(value) => setStatusFilter(value)}
                   options={statusOptions}
                   allowClear
-                  size="large"
+                  size="middle"
                   suffixIcon={<FunnelIcon className="w-4 h-4 text-gray-400" />}
                 />
               </div>
 
-              {/* Search */}
+              {/* Search (compact, no label) */}
               <div className="relative">
-                <label className="flex items-center gap-1.5 text-xs font-medium text-gray-700 mb-1.5">
-                  <MagnifyingGlassIcon className="w-3.5 h-3.5" />
-                  Pencarian
-                </label>
                 <Input
-                  placeholder="Cari invoice atau nama produk..."
-                  className="!h-10 !rounded-lg !border-gray-300 hover:!border-blue-400"
+                  placeholder="Cari invoice atau produk..."
+                  className="!h-8 !rounded-lg !border-gray-300"
                   prefix={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
                   onChange={(e) => setSearchText(e.target.value)}
                   allowClear

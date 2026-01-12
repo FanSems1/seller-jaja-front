@@ -27,14 +27,14 @@ function Semua({ status, date, search, StatusPill }) {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
 
   // Konfirmasi Pesanan modal state
   const [isKonfirmasiModalVisible, setIsKonfirmasiModalVisible] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [konfirmasiLoading, setKonfirmasiLoading] = useState(false);
 
-  const handleDetail = (orderId) => navigate(`/dashboard/pejualan/pesanan/detail-pesanan/${orderId}`);
+  const handleDetail = (orderId) => navigate(`/dashboard/penjualan/pesanan/detail-pesanan/${orderId}`);
 
   const showModal = () => setIsModalVisible(true);
   const handleCancel = () => setIsModalVisible(false);
@@ -260,7 +260,11 @@ function Semua({ status, date, search, StatusPill }) {
       dataIndex: 'invoice',
       key: 'invoice',
       width: 140,
-      render: (text) => <span className="text-[11px] font-medium text-gray-800 leading-tight break-all">{text}</span>
+      render: (text) => (
+        <span className="inline-flex items-center px-2 py-1 rounded-md bg-green-100 text-green-800 text-[11px] font-medium leading-tight break-all">
+          {text}
+        </span>
+      )
     },
     {
       title: 'Produk',
@@ -369,10 +373,10 @@ function Semua({ status, date, search, StatusPill }) {
                     font-size: 10px !important;
                     font-weight: 600 !important;
                 }
-                .compact-table .ant-table-tbody > tr > td {
-                    padding: 10px 12px !important;
-                    border-bottom: 1px solid #f3f4f6 !important;
-                }
+        .compact-table .ant-table-tbody > tr > td {
+          padding: 10px 12px !important;
+          border-bottom: none !important;
+        }
                 .compact-table .ant-table-cell {
                     line-height: 1.4 !important;
                 }
@@ -392,7 +396,7 @@ function Semua({ status, date, search, StatusPill }) {
       )}
 
       <div className="rounded-lg ring-1 ring-gray-200 overflow-hidden bg-white">
-        <Table
+          <Table
           columns={columns}
           dataSource={paginatedOrders}
           loading={loading}
@@ -401,7 +405,7 @@ function Semua({ status, date, search, StatusPill }) {
           scroll={{ x: 1100 }}
           sticky={{ offsetHeader: 0 }}
           className="modern-table text-[10px] compact-table"
-          rowClassName={() => 'hover:bg-gray-50'}
+          rowClassName={() => 'hover:bg-gray-50 cursor-default'}
           locale={{
             emptyText: loading ? "Memuat data..." : "Tidak ada data pesanan"
           }}
@@ -414,8 +418,12 @@ function Semua({ status, date, search, StatusPill }) {
               current={currentPage}
               total={filteredOrders.length}
               pageSize={pageSize}
-              onChange={(page) => setCurrentPage(page)}
-              showSizeChanger={false}
+              onChange={(page, newPageSize) => {
+                setCurrentPage(page);
+                if (newPageSize && newPageSize !== pageSize) setPageSize(newPageSize);
+              }}
+              showSizeChanger={true}
+              pageSizeOptions={["10", "50", "100"]}
               showTotal={(total) => `Total ${total} pesanan`}
               size="small"
             />

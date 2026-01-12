@@ -43,21 +43,20 @@ function PrintInvoice() {
         );
     }
 
-    const statusConfig = {
-        'Menunggu Pembayaran': { color: 'warning', text: 'Menunggu Pembayaran' },
-        'Paid': { color: 'success', text: 'Telah Dibayar' },
-        'Pesanan Selesai': { color: 'success', text: 'Selesai' },
-        'Dibatalkan': { color: 'danger', text: 'Dibatalkan' }
-    };
+    // Prefer current_status from API if available (contains color & name), otherwise fallback to status_transaksi
+    const statusName = orderData?.current_status?.status_transaksi || orderData?.current_status?.name || orderData?.status_transaksi || 'Menunggu Pembayaran';
+    const statusColor = orderData?.current_status?.color || (statusName === 'Selesai' ? 'success' : statusName === 'Dibatalkan' ? 'danger' : 'warning');
 
-    const status = statusConfig[orderData?.status_transaksi] || statusConfig['Menunggu Pembayaran'];
-    const totalProduct = orderData.details?.reduce((sum, item) => sum + ((item.harga_aktif || 0) * (item.qty || 0)), 0) || 0;
-    const shipping = orderData.biaya_ongkir || orderData.total_ongkir || orderData.ongkir || 0;
+    const status = { color: statusColor, text: statusName };
+
+    // Totals: prefer explicit fields from API when present
+    const totalProduct = Number(orderData.subtotal || orderData.details?.reduce((sum, item) => sum + ((item.harga_aktif || 0) * (item.qty || 0)), 0) || 0);
+    const shipping = Number(orderData.biaya_ongkir || orderData.total_ongkir || orderData.total_ongkir || 0) || 0;
     const discountVoucher = Number(orderData.diskon_voucher || 0) || 0;
     const discountVoucherToko = Number(orderData.diskon_voucher_toko || 0) || 0;
     const discount = discountVoucher + discountVoucherToko;
     const ppnNominal = Number(orderData.ppn_nominal || 0) || 0;
-    const grandTotal = Number(orderData.total_tagihan || (totalProduct + shipping - discount + ppnNominal)) || 0;
+    const grandTotal = Number(orderData.total_tagihan || orderData.total_pembayaran || (totalProduct + shipping - discount + ppnNominal)) || 0;
 
     return (
         <>
@@ -426,7 +425,21 @@ function PrintInvoice() {
                 }
             `}</style>
             
-            <div className="invoice-container">
+            <div className="invoice-container relative">
+                {/* Watermark / decorative receipt SVG behind invoice */}
+                <div className="absolute right-6 top-6 pointer-events-none opacity-8 select-none" aria-hidden="true">
+                    <svg width="220" height="140" viewBox="0 0 220 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-56 h-36">
+                        <defs>
+                            <linearGradient id="invg" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stopColor="#E6F9FF" stopOpacity="0.9" />
+                                <stop offset="100%" stopColor="#C9F8FF" stopOpacity="0.6" />
+                            </linearGradient>
+                        </defs>
+                        <rect x="8" y="8" width="160" height="100" rx="12" fill="url(#invg)" opacity="0.12" />
+                        <path d="M24 28h120M24 44h120M24 60h80" stroke="#DDF7FF" strokeWidth="2" strokeLinecap="round" opacity="0.24" />
+                        <circle cx="180" cy="20" r="14" fill="#DDF7FF" opacity="0.18" />
+                    </svg>
+                </div>
                 {/* Header */}
                 <div className="header">
                     <div className="header-left">

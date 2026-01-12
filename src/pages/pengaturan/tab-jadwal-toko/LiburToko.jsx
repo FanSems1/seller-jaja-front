@@ -1,5 +1,5 @@
 import { Card, CardBody } from '@material-tailwind/react'
-import { Button, message, Spin } from 'antd'
+import { Button, message, Spin, DatePicker, Alert } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
 import React, { useState, useEffect } from 'react'
 import { API_BASE_URL, apiFetch } from '../../../configs/api';
@@ -23,46 +23,65 @@ function LiburToko() {
     return null;
   };
 
-  // Fetch toko detail
-  useEffect(() => {
-    const fetchTokoDetail = async () => {
-      try {
-        setLoading(true);
-        const slugToko = getSlugToko();
-        if (!slugToko) {
-          message.error('Slug toko tidak ditemukan');
-          return;
-        }
+  // Fetch toko detail (factored for retry)
+  const [fetchError, setFetchError] = useState(null);
 
-        const res = await apiFetch(`${API_BASE_URL}/main/toko/${slugToko}`);
-        const toko = res.data || res.toko;
-        if (toko) {
-          setTokoData(toko);
-          // Parse data_libur_toko if exists
-          if (toko.data_libur_toko && toko.data_libur_toko !== 'null') {
-            try {
-              const liburInfo = JSON.parse(toko.data_libur_toko);
-              setLiburData(liburInfo);
-            } catch (e) {
-              console.error('Error parsing data_libur_toko:', e);
-            }
-          }
-        } else {
-          message.error(res.message || 'Gagal memuat data toko');
-        }
-      } catch (error) {
-        console.error('Error fetching toko detail:', error);
-        message.error(error.message || 'Gagal memuat data toko');
-      } finally {
-        setLoading(false);
+  const fetchTokoDetail = async () => {
+    try {
+      setFetchError(null);
+      setLoading(true);
+      const slugToko = getSlugToko();
+      if (!slugToko) {
+        message.error('Slug toko tidak ditemukan');
+        setFetchError('Slug toko tidak ditemukan');
+        return;
       }
-    };
 
+      const res = await apiFetch(`${API_BASE_URL}/main/toko/${slugToko}`);
+      const toko = res.data || res.toko;
+      if (toko) {
+        setTokoData(toko);
+        // Parse data_libur_toko if exists
+        if (toko.data_libur_toko && toko.data_libur_toko !== 'null') {
+          try {
+            const liburInfo = JSON.parse(toko.data_libur_toko);
+            setLiburData(liburInfo);
+          } catch (e) {
+            console.error('Error parsing data_libur_toko:', e);
+          }
+        }
+      } else {
+        const msg = res.message || 'Gagal memuat data toko';
+        message.error(msg);
+        setFetchError(msg);
+      }
+    } catch (error) {
+      console.error('Error fetching toko detail:', error);
+      const msg = error.message || 'Gagal memuat data toko';
+      message.error(msg);
+      setFetchError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchTokoDetail();
   }, []);
 
   if (loading) {
     return <Spin />;
+  }
+
+  if (fetchError) {
+    return (
+      <div className='p-4 mt-4'>
+        <Alert message="Gagal memuat data toko" description={fetchError} type="error" showIcon />
+        <div className='mt-4'>
+          <Button type="primary" onClick={() => fetchTokoDetail()}>Coba Lagi</Button>
+        </div>
+      </div>
+    );
   }
   return (
     <div className='p-4 mt-4'>

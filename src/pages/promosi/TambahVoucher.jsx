@@ -117,7 +117,7 @@ export function TambahVoucher() {
   };
 
   return (
-    <div className="mt-12 mb-8">
+    <div className="mb-8">
       <Card>
         <CardBody>
           {/* Header */}

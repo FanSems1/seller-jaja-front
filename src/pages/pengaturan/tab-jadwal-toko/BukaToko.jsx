@@ -28,52 +28,60 @@ function BukaToko() {
       return null;
     };
 
-    // Fetch toko detail
-    useEffect(() => {
-      const fetchTokoDetail = async () => {
-        try {
-          setLoading(true);
-          const slugToko = getSlugToko();
-          if (!slugToko) {
-            message.error('Slug toko tidak ditemukan');
-            return;
-          }
+    // Fetch toko detail (factored to allow retry)
+    const [fetchError, setFetchError] = useState(null);
 
-          const res = await apiFetch(`${API_BASE_URL}/main/toko/${slugToko}`);
-          const toko = res.data || res.toko;
-          if (toko) {
-            setTokoData(toko);
-            // Parse data_buka_toko
-            try {
-              const bukaData = JSON.parse(toko.data_buka_toko || '{}');
-              const daysActive = (bukaData.days || 'monday,tuesday,wednesday,thursday,friday,saturday,sunday').split(',');
-              const activeDaysMap = {};
-              days.forEach(day => {
-                activeDaysMap[day] = daysActive.includes(day.toLowerCase());
-              });
-              setSelectedDays(activeDaysMap);
-              setTimeOpen(bukaData.time_open || '08:00');
-              setTimeClose(bukaData.time_close || '22:00');
-            } catch (e) {
-              console.error('Error parsing data_buka_toko:', e);
-              // Default all days
-              const defaultDays = {};
-              days.forEach(day => {
-                defaultDays[day] = true;
-              });
-              setSelectedDays(defaultDays);
-            }
-          } else {
-            message.error(res.message || 'Gagal memuat data toko');
-          }
-        } catch (error) {
-          console.error('Error fetching toko detail:', error);
-          message.error(error.message || 'Gagal memuat data toko');
-        } finally {
-          setLoading(false);
+    const fetchTokoDetail = async () => {
+      try {
+        setFetchError(null);
+        setLoading(true);
+        const slugToko = getSlugToko();
+        if (!slugToko) {
+          message.error('Slug toko tidak ditemukan');
+          setFetchError('Slug toko tidak ditemukan');
+          return;
         }
-      };
 
+        const res = await apiFetch(`${API_BASE_URL}/main/toko/${slugToko}`);
+        const toko = res.data || res.toko;
+        if (toko) {
+          setTokoData(toko);
+          // Parse data_buka_toko
+          try {
+            const bukaData = JSON.parse(toko.data_buka_toko || '{}');
+            const daysActive = (bukaData.days || 'monday,tuesday,wednesday,thursday,friday,saturday,sunday').split(',');
+            const activeDaysMap = {};
+            days.forEach(day => {
+              activeDaysMap[day] = daysActive.includes(day.toLowerCase());
+            });
+            setSelectedDays(activeDaysMap);
+            setTimeOpen(bukaData.time_open || '08:00');
+            setTimeClose(bukaData.time_close || '22:00');
+          } catch (e) {
+            console.error('Error parsing data_buka_toko:', e);
+            // Default all days
+            const defaultDays = {};
+            days.forEach(day => {
+              defaultDays[day] = true;
+            });
+            setSelectedDays(defaultDays);
+          }
+        } else {
+          const msg = res.message || 'Gagal memuat data toko';
+          message.error(msg);
+          setFetchError(msg);
+        }
+      } catch (error) {
+        console.error('Error fetching toko detail:', error);
+        const msg = error.message || 'Gagal memuat data toko';
+        message.error(msg);
+        setFetchError(msg);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    useEffect(() => {
       fetchTokoDetail();
     }, []);
 
@@ -86,6 +94,17 @@ function BukaToko() {
 
     if (loading) {
       return <Spin />;
+    }
+
+    if (fetchError) {
+      return (
+        <div className='p-4 mt-4'>
+          <Alert message="Gagal memuat data toko" description={fetchError} type="error" showIcon />
+          <div className='mt-4'>
+            <Button type="primary" onClick={() => fetchTokoDetail()}>Coba Lagi</Button>
+          </div>
+        </div>
+      );
     }
 
   return (

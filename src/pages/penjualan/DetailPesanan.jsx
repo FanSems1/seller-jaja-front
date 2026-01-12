@@ -75,7 +75,7 @@ function DetailPesanan() {
   // This ensures the printed view is consistent with the `PrintInvoice.jsx` component.
   const handlePrint = () => {
     // open the print route in a new tab; route expects an :id param
-    const printUrl = `/pejualan/print-invoice/${id}`;
+  const printUrl = `/penjualan/print-invoice/${id}`;
     window.open(printUrl, '_blank');
   };
 

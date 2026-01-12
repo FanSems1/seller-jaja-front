@@ -24,6 +24,9 @@ export function reducer(state, action) {
     case "OPEN_CONFIGURATOR": {
       return { ...state, openConfigurator: action.value };
     }
+    case "MINI_SIDENAV": {
+      return { ...state, miniSidenav: action.value };
+    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
     }
@@ -35,6 +38,7 @@ export function MaterialTailwindControllerProvider({ children }) {
     openSidenav: false,
     sidenavColor: "dark",
     sidenavType: "white",
+    miniSidenav: false,
     transparentNavbar: true,
     fixedNavbar: false,
     openConfigurator: false,
@@ -83,3 +87,5 @@ export const setFixedNavbar = (dispatch, value) =>
   dispatch({ type: "FIXED_NAVBAR", value });
 export const setOpenConfigurator = (dispatch, value) =>
   dispatch({ type: "OPEN_CONFIGURATOR", value });
+export const setMiniSidenav = (dispatch, value) =>
+  dispatch({ type: "MINI_SIDENAV", value });

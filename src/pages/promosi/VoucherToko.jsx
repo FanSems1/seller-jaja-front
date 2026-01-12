@@ -22,6 +22,7 @@ export function VoucherToko() {
     pageSize: 10,
     total: 0,
   });
+  const [pageSize, setPageSize] = useState(10);
 
   // Fetch vouchers
   const fetchVouchers = async (page = 1, search = '') => {
@@ -58,7 +59,7 @@ export function VoucherToko() {
   };
 
   useEffect(() => {
-    fetchVouchers();
+    fetchVouchers(pagination.current);
   }, []);
 
   // Handle search
@@ -213,21 +214,24 @@ export function VoucherToko() {
     <div className="mb-8">
       <Card>
 
+        {/* Page header (same style as Pesanan) */}
+        <div className="px-6 pt-6 pb-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-gray-900">Voucher Toko</h1>
+            </div>
+          </div>
+        </div>
+
         <CardBody className="p-6">
-          {/* Modern Filter Section */}
-          <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-4 mb-6 border border-gray-200 shadow-sm">
-            <div className="grid md:grid-cols-5 gap-3">
-              
-              {/* Status Filter */}
-              <div className="relative">
-                <label className="flex items-center gap-1.5 text-xs font-medium text-gray-700 mb-1.5">
-                  <FunnelIcon className="w-3.5 h-3.5" />
-                  Status Voucher
-                </label>
+          {/* Compact Filter Row (no heavy background) */}
+          <div className="mb-4">
+            <div className="grid md:grid-cols-5 gap-3 items-center">
+              <div>
                 <Select
                   className="w-full"
-                  placeholder="Semua Status"
-                  size="large"
+                  placeholder="Status"
+                  size="middle"
                   allowClear
                   onChange={(value) => setStatusFilter(value || '')}
                   suffixIcon={<FunnelIcon className="w-4 h-4 text-gray-400" />}
@@ -237,17 +241,11 @@ export function VoucherToko() {
                   ]}
                 />
               </div>
-
-              {/* Category Filter */}
-              <div className="relative">
-                <label className="flex items-center gap-1.5 text-xs font-medium text-gray-700 mb-1.5">
-                  <FunnelIcon className="w-3.5 h-3.5" />
-                  Kategori Promo
-                </label>
+              <div>
                 <Select
                   className="w-full"
-                  placeholder="Semua Kategori"
-                  size="large"
+                  placeholder="Kategori"
+                  size="middle"
                   allowClear
                   onChange={(value) => setCategoryFilter(value || '')}
                   suffixIcon={<FunnelIcon className="w-4 h-4 text-gray-400" />}
@@ -257,48 +255,33 @@ export function VoucherToko() {
                   ]}
                 />
               </div>
-
-              {/* Date Range Filter */}
-              <div className="relative">
-                <label className="flex items-center gap-1.5 text-xs font-medium text-gray-700 mb-1.5">
-                  <CalendarIcon className="w-3.5 h-3.5" />
-                  Periode Promo
-                </label>
+              <div>
                 <RangePicker
-                  className="w-full !h-10 !rounded-lg !border-gray-300 hover:!border-blue-400"
+                  className="w-full !h-8 !rounded-lg !border-gray-300"
                   format="DD/MM/YYYY"
                   onChange={(dates) => setDateRange(dates)}
                   placeholder={['Mulai', 'Berakhir']}
                 />
               </div>
-
-              {/* Search */}
-              <div className="relative">
-                <label className="flex items-center gap-1.5 text-xs font-medium text-gray-700 mb-1.5">
-                  <MagnifyingGlassIcon className="w-3.5 h-3.5" />
-                  Pencarian
-                </label>
+              <div>
                 <Input
                   placeholder="Cari judul atau kode promo..."
-                  className="!h-10 !rounded-lg !border-gray-300 hover:!border-blue-400"
+                  className="!h-8 !rounded-lg !border-gray-300"
                   prefix={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
                   onChange={(e) => handleSearch(e.target.value)}
                   allowClear
                 />
               </div>
-
-              {/* Add Voucher Button - aligned to the right of the filters */}
-              <div className="flex items-end justify-end">
+              <div className="flex items-center justify-end">
                 <Button
                   color="green"
                   variant="gradient"
-                  className="flex items-center gap-2 !h-10 !px-4"
+                  className="flex items-center gap-2 !h-8 !px-3"
                   onClick={() => navigate('/dashboard/promosi/tambah-voucher')}
                 >
-                  <PlusOutlined /> Tambah Voucher
+                  <PlusOutlined />Tambah
                 </Button>
               </div>
-
             </div>
           </div>
 
@@ -309,22 +292,34 @@ export function VoucherToko() {
             </div>
           ) : vouchers.length > 0 ? (
             <>
-              <Table
-                columns={columns}
-                dataSource={vouchers}
-                rowKey="id_promo"
-                pagination={false}
-                scroll={{ x: 1200 }}
-              />
+              <div>
+                <style>{`
+                  .compact-table-promosi .ant-table-tbody > tr > td { border-bottom: none !important; }
+                `}</style>
+                <Table
+                  className="compact-table-promosi"
+                  columns={columns}
+                  dataSource={vouchers}
+                  rowKey="id_promo"
+                  pagination={false}
+                  scroll={{ x: 1200 }}
+                  rowClassName={() => 'hover:bg-gray-50 cursor-default'}
+                />
+              </div>
 
               {/* Pagination */}
               <div className="mt-6 flex justify-end">
                 <Pagination
                   current={pagination.current}
                   total={pagination.total}
-                  pageSize={pagination.pageSize}
-                  onChange={(page) => fetchVouchers(page, searchText)}
-                  showSizeChanger={false}
+                  pageSize={pageSize}
+                  onChange={(page, newSize) => {
+                    setPageSize(newSize || pageSize);
+                    setPagination(prev => ({ ...prev, current: page, pageSize: newSize || prev.pageSize }));
+                    fetchVouchers(page, searchText);
+                  }}
+                  showSizeChanger={true}
+                  pageSizeOptions={["10", "50", "100"]}
                   showTotal={(total) => `Total ${total} voucher`}
                 />
               </div>
