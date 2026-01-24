@@ -65,9 +65,13 @@ const ProtectedRoute = ({ children }) => {
               allowEscapeKey: false,
             }).then((result) => {
               if (result.isConfirmed) {
-                // Redirect ke jaja.id untuk buka toko
+                // Jika user memilih untuk buka toko, buka jaja.id di tab baru
+                // tapi DO NOT force-navigate back to login so the user isn't surprised
+                // after performing an action that re-renders ProtectedRoute.
                 window.open('https://jaja.id', '_blank');
+                return;
               }
+              // Jika user membatalkan, arahkan ke halaman login seperti sebelumnya
               navigate('/auth/sign-in', { replace: true });
             });
 

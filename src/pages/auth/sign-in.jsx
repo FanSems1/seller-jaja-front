@@ -92,29 +92,29 @@ export function SignIn() {
 
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-[#56b4e6]">
+    <section className="min-h-screen flex items-center justify-center bg-[#56b4e6] py-8">
 
-      <div className="bg-white rounded-[3rem] m-10 p-5 flex gap-4">
-        <div className="w-2/5 h-full hidden lg:block">
+      <div className="bg-white rounded-[2rem] mx-4 p-6 flex gap-6 max-w-6xl w-full items-center">
+        <div className="w-1/2 hidden lg:block max-h-[70vh] overflow-hidden rounded-2xl">
           <img
             src={All}
-            className="h-full w-full object-cover rounded-3xl"
+            className="h-full w-full object-cover rounded-2xl"
           />
         </div>
-        <div className="w-full lg:w-3/5 mt-24">
+        <div className="w-full lg:w-1/2 flex flex-col justify-center py-6">
           <div className="text-center">
             <div className="flex justify-center items-center mb-10">
-              <img src={Logo} alt="" className="w-52 h-28" />
+              <img src={Logo} alt="" className="w-40 h-20 object-contain" />
             </div>
             <div className=" text-[#6A6A6A] mb-4 text-xl">Welcome to</div>
             <div className="flex justify-center items-center space-x-6">
               <img src={Saller} alt="" className="w-10 h-8" /> <span>
-                <i className="font-bold text-3xl">Saller</i> <i className="text-3xl ">Center</i>
+                <i className="font-bold text-3xl">Seller</i> <i className="text-3xl ">Center</i>
               </span>
             </div>
           </div>
 
-          <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2" onSubmit={handleSubmit}>
+          <form className="mt-6 mb-2 mx-auto w-72 max-w-screen-lg lg:w-10/12" onSubmit={handleSubmit}>
             <div className="mb-1 flex flex-col gap-6">
               <div className="relative mb-3">
                 <input
@@ -148,28 +148,20 @@ export function SignIn() {
                   Password
                 </label>
               </div>
-
-              <div className="w-full flex  justify-end items-end">
-                <div className="flex">
-                  <img src={Forgot} alt="" className="w-9 h-9" /> <span className="text-lg ml-2 text-[#fcb439] font-bold">
-                    <a href="https://jaja.id/main/auth/lupaPassword" target="_blank" rel="noopener noreferrer" className="text-[#fcb439] ml-1">Lupa Password?</a>
-                  </span>
-                </div>
-              </div>
             </div>
 
             {error && (
               <div className="mt-4 text-center text-red-600 text-sm">{error}</div>
             )}
-            <Button className="mt-6 bg-[#56b4e6] h-12" fullWidth type="submit" disabled={loading}>
+            <Button className="mt-6 bg-[#56b4e6] h-10" fullWidth type="submit" disabled={loading}>
               {loading ? "Memproses..." : "Login"}
             </Button>
 
 
 
 
-            <div className="flex justify-center items-center mt-8">
-              <div className="text-center w-[17rem] text-[#BEBEBE]">
+            <div className="flex justify-center items-center mt-6">
+              <div className="text-center text-sm text-[#BEBEBE]">
                 Copyright © 2024 All Right Reserved Jaja ID.
               </div>
             </div>

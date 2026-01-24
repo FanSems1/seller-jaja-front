@@ -56,7 +56,7 @@ function OrderTable({orders }) {
                                 )}
                             </td>
                             <td className="border px-4 py-2 text-base">
-                                <div>{item.courier}</div>
+                                <div>{String(item.courier || '').toUpperCase()}</div>
                                 <div className='mb-4'>Rp {item.courierPrice}</div>
                                 <div className='mb-2'>
                                     <Tag className="bg-gray-200 px-2 py-1 rounded">Belum Dicetak</Tag>

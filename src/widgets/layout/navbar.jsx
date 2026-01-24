@@ -50,7 +50,7 @@ export function Navbar({ brandName, routes, action }) {
 }
 
 Navbar.defaultProps = {
-  brandName: "Jaja Saller",
+  brandName: "Jaja Seller",
   action: (
     <a
       href="https://www.creative-tim.com/product/material-tailwind-dashboard-react"

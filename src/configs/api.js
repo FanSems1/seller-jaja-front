@@ -67,6 +67,24 @@ export const VOUCHER_ENDPOINTS = {
   TOGGLE: (id) => `${API_BASE_URL}/seller/v2/voucher-toko/${id}/toggle`,
 };
 
+// Promo Jaja endpoints
+export const PROMO_JAJA_ENDPOINTS = {
+  LIST: `${API_BASE_URL}/seller/v2/promo-jaja`,
+  DETAIL: (id) => `${API_BASE_URL}/seller/v2/promo-jaja/${id}`,
+  CREATE: `${API_BASE_URL}/seller/v2/promo-jaja`,
+  UPDATE: (id) => `${API_BASE_URL}/seller/v2/promo-jaja/${id}`,
+  TOGGLE: (id) => `${API_BASE_URL}/seller/v2/promo-jaja/${id}/toggle`,
+};
+
+// Banner endpoints
+export const BANNER_ENDPOINTS = {
+  LIST: `${API_BASE_URL}/seller/v2/banner`,
+  CREATE: `${API_BASE_URL}/seller/v2/banner`,
+  DETAIL: (id) => `${API_BASE_URL}/seller/v2/banner/${id}`,
+  UPDATE: (id) => `${API_BASE_URL}/seller/v2/banner/${id}`,
+  DELETE: (id) => `${API_BASE_URL}/seller/v2/banner/${id}`,
+};
+
 // Category endpoints
 export const CATEGORY_ENDPOINTS = {
   MEGA_MENU: `${API_BASE_URL}/main/kategories/mega-menu`,

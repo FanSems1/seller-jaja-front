@@ -24,12 +24,16 @@ import DaftarEtalase from "./pages/produk/DaftarEtalase";
 import VoucherToko from "./pages/promosi/VoucherToko";
 import TambahVoucher from "./pages/promosi/TambahVoucher";
 import EditVoucher from "./pages/promosi/EditVoucher";
+import VoucherJaja from "./pages/promosi/VoucherJaja";
+import CreatePromoJaja from "./pages/promosi/CreatePromoJaja";
+import EditPromoJaja from "./pages/promosi/EditPromoJaja";
 import ActivationCoupon from "./pages/promosi/ActivationCoupon";
 import PengaturanVoucher from "./pages/promosi/pengaturanVoucher/PengaturanVoucher";
 import RatingProduk from "./pages/riview/RatingProduk";
 import DetailReview from "./pages/riview/rating-produk/DetailReview";
 import ReportProduk from "./pages/riview/report-produk/ReportProduk";
 import PengaturanToko from "./pages/pengaturan/PengaturanToko";
+import Banner from "./pages/pengaturan/Banner";
 import PenghasilanToko from "./pages/dompetku/penghasilan-toko/PenghasilanToko";
 import SaldoToko from "./pages/dompetku/saldo-toko/SaldoToko";
 import RekeningBank from "./pages/dompetku/saldo-toko/tab-saldo-toko/RekeningBank";
@@ -86,6 +90,26 @@ export const routes = [
         element: <VoucherToko />,
       },
       {
+        icon: <TagIcon {...icon} />,
+        name: "Voucher Jaja",
+        path: "/promosi/voucher-jaja",
+        element: <VoucherJaja />,
+      },
+      {
+        // route for adding a promo jaja (hidden from sidebar)
+        name: "Tambah Promo Jaja",
+        path: "/promosi/tambah-promo-jaja",
+        element: <CreatePromoJaja />,
+        hidden: true,
+      },
+      {
+        // route for editing a promo jaja (hidden from sidebar)
+        name: "Edit Promo Jaja",
+        path: "/promosi/edit-promo-jaja/:id",
+        element: <EditPromoJaja />,
+        hidden: true,
+      },
+      {
         // route for adding a voucher (hidden from sidebar)
         name: "Tambah Voucher",
         path: "/promosi/tambah-voucher",
@@ -126,6 +150,12 @@ export const routes = [
             element: <Saldo />,
           },          
         ]
+      },
+            {
+        icon: <RectangleStackIcon {...icon} />,
+        name: "Banner",
+        path: "/pengaturan/banner",
+        element: <Banner />,
       },
       {
         icon: <InformationCircleIcon {...icon} />,

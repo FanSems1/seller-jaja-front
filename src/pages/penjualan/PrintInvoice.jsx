@@ -114,7 +114,6 @@ function PrintInvoice() {
                     color: #475569;
                 }
                 .invoice-block {
-                    background: linear-gradient(90deg, rgba(59,130,246,0.06), rgba(14,165,233,0.04));
                     padding: 14px 18px;
                     border-radius: 8px;
                     text-align: right;
@@ -167,26 +166,57 @@ function PrintInvoice() {
                     padding: 0 32px;
                 }
                 .grid-3 {
+                    /* kept for compatibility but replaced by unified info-strip below */
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
                     gap: 24px;
                     margin-bottom: 24px;
                 }
-                .info-box {
-                    border-left: 4px solid #0ea5e9;
-                    padding: 12px 16px;
-                    background: rgba(240, 249, 255, 0.5);
+                .info-strip {
+                    background: #ffffff;
+                    border: 1px solid rgba(14,165,233,0.12);
+                    border-radius: 12px;
+                    padding: 16px;
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr;
+                    gap: 16px;
+                    align-items: start;
+                    margin-bottom: 20px;
+                    box-shadow: 0 6px 24px rgba(14,165,233,0.03);
                 }
-                .info-box-title {
+                .info-col {
                     display: flex;
-                    align-items: center;
+                    flex-direction: column;
                     gap: 8px;
+                }
+                .info-title {
+                    font-size: 11px;
+                    color: #475569;
                     font-weight: 700;
-                    font-size: 12px;
-                    color: #111827;
                     text-transform: uppercase;
-                    letter-spacing: 0.05em;
-                    margin-bottom: 8px;
+                    letter-spacing: 0.04em;
+                }
+                .info-value {
+                    font-size: 15px;
+                    color: #0f172a;
+                    font-weight: 800;
+                }
+                .info-meta {
+                    font-size: 12px;
+                    color: #6b7280;
+                    font-weight: 500;
+                }
+                .info-address {
+                    padding: 12px;
+                    background: linear-gradient(90deg, rgba(240,249,255,0.6), rgba(255,255,255,0));
+                    border-radius: 8px;
+                    border-left: 4px solid #06b6d4;
+                }
+                .info-divider {
+                    width: 1px;
+                    background: rgba(15,23,42,0.04);
+                    height: 100%;
+                    margin: 0 8px;
                 }
                 .company-address {
                     font-size: 12px;
@@ -446,7 +476,7 @@ function PrintInvoice() {
                         <img src={LogoJaja} alt="Logo" className="logo" />
                         <div className="company-meta">
                             <div className="company-name">Jaja Marketplace</div>
-                            <div className="company-sub">Jl. Contoh Alamat No.123, Jakarta • (021) 1234 5678</div>
+                            <div className="company-sub">Jl. Hj Baping 100, Jakarta • (021) 1234 5678</div>
                             <div className="company-sub">support@jaja.id • www.jaja.id</div>
                         </div>
                     </div>
@@ -466,27 +496,27 @@ function PrintInvoice() {
 
                 {/* Content */}
                 <div className="content">
-                    {/* Grid Info */}
-                    <div className="grid-3">
-                        {/* Column 1: Penerima */}
-                        <div>
-                            <div className="card" style={{ marginBottom: '12px' }}>
-                                <div className="card-label">Penerima</div>
-                                <div className="card-value">{orderData.nama_penerima || '-'}</div>
-                                <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>📞 {orderData.telp_penerima || '-'}</div>
+                    {/* Unified Grid Info Strip */}
+                    <div className="info-strip">
+                        {/* Column 1: Penerima & Address */}
+                        <div className="info-col">
+                            <div>
+                                <div className="info-title">Penerima</div>
+                                <div className="info-value">{orderData.nama_penerima || '-'}</div>
+                                <div className="info-meta">📞 {orderData.telp_penerima || '-'}</div>
                             </div>
-                            <div className="info-box" style={{ marginTop: '6px' }}>
-                                <div className="info-box-title">📍 Alamat Pengiriman</div>
-                                <div className="info-box-content">{orderData.alamat_pengiriman || '-'}</div>
+                            <div className="info-address" style={{ marginTop: 6 }}>
+                                <div className="info-title">Alamat Pengiriman</div>
+                                <div className="info-meta" style={{ marginTop: 6 }}>{orderData.alamat_pengiriman || '-'}</div>
                             </div>
                         </div>
 
-                        {/* Column 2: Pemesan */}
-                        <div>
-                            <div className="card" style={{ marginBottom: '12px' }}>
-                                <div className="card-label">Pemesan</div>
-                                <div className="card-value">{orderData.nama_customer || '-'}</div>
-                                <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>{orderData.email_customer || orderData.email || '-'}</div>
+                        {/* Column 2: Pemesan & Notes */}
+                        <div className="info-col">
+                            <div>
+                                <div className="info-title">Pemesan</div>
+                                <div className="info-value">{orderData.nama_customer || '-'}</div>
+                                <div className="info-meta">{orderData.email_customer || orderData.email || '-'}</div>
                             </div>
                             {orderData.pesan_customer && (
                                 <div className="note-box" style={{ marginTop: 8 }}>
@@ -497,17 +527,17 @@ function PrintInvoice() {
                         </div>
 
                         {/* Column 3: Pengiriman & Pembayaran */}
-                        <div>
-                            <div className="card courier-card" style={{ marginBottom: '12px' }}>
-                                <div className="card-label">🚚 Kurir</div>
-                                <div className="card-value courier-value">{orderData.pengiriman || '-'}</div>
-                                {orderData.resi && <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>Resi: {orderData.resi}</div>}
+                        <div className="info-col">
+                            <div>
+                                <div className="info-title">Kurir</div>
+                                <div className="info-value" style={{ textTransform: 'uppercase' }}>{orderData.pengiriman || '-'}</div>
+                                {orderData.resi && <div className="info-meta" style={{ marginTop: 6 }}>Resi: {orderData.resi}</div>}
                             </div>
-                            <div className="card">
-                                <div className="card-label">💳 Pembayaran</div>
-                                <div className="card-value">{orderData.metode_pembayaran || 'Belum Dibayar'}</div>
+                            <div style={{ marginTop: 6 }}>
+                                <div className="info-title">Pembayaran</div>
+                                <div className="info-value">{orderData.metode_pembayaran || 'Belum Dibayar'}</div>
                                 {orderData.tgl_pembayaran && (
-                                    <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>Dibayar: {orderData.tgl_pembayaran}</div>
+                                    <div className="info-meta" style={{ marginTop: 6 }}>Dibayar: {orderData.tgl_pembayaran}</div>
                                 )}
                             </div>
                         </div>
@@ -521,7 +551,6 @@ function PrintInvoice() {
 
                     {/* Products */}
                     <div className="section-header">
-                        <span>🛍️</span>
                         <span className="section-title">Rincian Pesanan</span>
                     </div>
                     <table>
@@ -598,7 +627,6 @@ function PrintInvoice() {
                 <div className="footer">
                     <div className="footer-content">
                         <div className="footer-left">
-                            <p><span className="platform">Platform: {orderData.platform}</span></p>
                             <p>Terima kasih telah berbelanja!</p>
                         </div>
                         <div className="footer-right">

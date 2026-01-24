@@ -302,7 +302,8 @@ function TambahProduk() {
                     // Send exactly as Postman format - all as strings
                     formData.append('nama_produk', String(namaProduk));
                     formData.append('id_kategori', String(idKategori));
-                    formData.append('id_sub_kategori', String(idSubKategori || ''));
+                    // If sub category not selected, send 0 as required by backend
+                    formData.append('id_sub_kategori', String(idSubKategori || '0'));
                     formData.append('deskripsi', String(deskripsi || ''));
                     formData.append('merek', String(merek));
                     formData.append('kode_sku', String(kodeSku || ''));
@@ -634,8 +635,8 @@ const handleCancel2 = () => {
                           onChange={(val) => setAsalProduk(val)}
                           size="middle"
                       >
-                          <Option value="150">Dalam Negeri</Option>
-                          <Option value="151">Luar Negeri</Option>
+                          <Option value="4">Dalam Negeri</Option>
+                          <Option value="5">Luar Negeri</Option>
                       </Select>
                   </div>
 

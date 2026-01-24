@@ -32,7 +32,7 @@ export function SignUp() {
             <div className=" text-[#6A6A6A] mb-4 text-xl">Welcome to</div>
             <div className="flex justify-center items-center space-x-6">
               <img src={Saller} alt="" className="w-10 h-8" /> <span>
-                <i className="font-bold text-3xl">Saller</i> <i className="text-3xl ">Center</i>
+                <i className="font-bold text-3xl">Seller</i> <i className="text-3xl ">Center</i>
               </span>
             </div>
           </div>

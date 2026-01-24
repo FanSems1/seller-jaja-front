@@ -25,7 +25,7 @@ function DetailPesanan() {
   const [error, setError] = useState("");
   // Resi modal ste
   const [resiModalOpen, setResiModalOpen] = useState(false);
-  const [formResi, setFormResi] = useState({ ekspedisi: 'JNE', resi: '', tanggal: new Date().toISOString().split('T')[0], catatan: '' });
+  const [formResi, setFormResi] = useState({ ekspedisi: '', resi: '', tanggal: new Date().toISOString().split('T')[0], catatan: '' });
   const ekspedisiOptions = [
     { label: 'JNE', value: 'JNE' },
     { label: 'J&T', value: 'J&T' },
@@ -52,6 +52,12 @@ function DetailPesanan() {
 
         if (response.success && response.data) {
           setOrderData(response.data);
+          // default ekspedisi in resi form should match customer's chosen courier
+          setFormResi(prev => ({
+            ...prev,
+            ekspedisi: response.data.pengiriman || response.data.ekspedisi || 'JNE',
+            tanggal: response.data.tanggal_pengiriman || response.data.tgl_pengiriman || new Date().toISOString().split('T')[0]
+          }));
         } else {
           setError(response.message || "Gagal memuat detail pesanan");
         }
@@ -159,6 +165,18 @@ function DetailPesanan() {
     'selesai': { color: 'info', text: 'Selesai', bg: 'bg-gray-600', border: 'border-gray-700', textColor: 'text-white' },
     'dibatalkan': { color: 'info', text: 'Dibatalkan', bg: 'bg-red-500', border: 'border-red-600', textColor: 'text-white' },
     'pengembalian dana': { color: 'info', text: 'Pengembalian Dana', bg: 'bg-red-500', border: 'border-red-600', textColor: 'text-white' }
+  };
+
+  // Minimal colored dot per status while keeping pill background neutral
+  const statusDotMap = {
+    'menunggu pembayaran': 'bg-yellow-400',
+    'belum dibayar': 'bg-gray-500',
+    'paid': 'bg-green-500',
+    'diproses': 'bg-blue-500',
+    'dikirim': 'bg-purple-500',
+    'selesai': 'bg-gray-600',
+    'dibatalkan': 'bg-red-500',
+    'pengembalian dana': 'bg-red-500'
   };
 
   // Prefer item-level / order-level "status_pesanan" when present, otherwise fallback to status_transaksi
@@ -491,7 +509,7 @@ function DetailPesanan() {
             <input
               type="text"
               name="ekspedisi"
-              value="JNE"
+              value={formResi.ekspedisi || 'JNE'}
               readOnly
               disabled
               className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-700 cursor-not-allowed"
@@ -641,10 +659,9 @@ function DetailPesanan() {
                 <h1 className="text-2xl font-bold text-gray-800 mb-1">Detail Pesanan</h1>
               </div>
               <div className="text-right">
-                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold border-2 ${status.bg} ${status.border} ${status.textColor} shadow-md`}>
-                  {/* solid white dot (no animation) for contrast */}
-                  <span className="w-2 h-2 rounded-full bg-white" />
-                  {status.text}
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md text-sm font-semibold bg-white border border-gray-200 text-gray-800 shadow-sm">
+                  <span className={`w-2 h-2 rounded-full ${statusDotMap[normalizedKey] || 'bg-gray-400'}`} />
+                  <span>{status.text}</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
                   {orderData.created_date} • {orderData.created_time}
@@ -652,117 +669,152 @@ function DetailPesanan() {
               </div>
             </div>
 
-            {/* Order Info */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
-              <div>
-                <p className="text-xs text-gray-500 mb-1">No. Invoice</p>
-                <p className="text-sm font-bold text-gray-800">{orderData.invoice}</p>
+            {/* Enhanced Order Info + Pengiriman + Pembayaran */}
+            <div className="flex flex-col md:flex-row md:items-stretch gap-0 p-0 bg-white rounded-lg border border-gray-100 overflow-hidden">
+              {/* Invoice */}
+              <div className="flex-1 flex flex-col justify-center px-6 py-4 min-w-[160px]">
+                <div className="flex items-center gap-2 mb-1">
+                  <CreditCardIcon className="w-5 h-5 text-blue-500" />
+                  <span className="text-xs text-gray-500">No. Invoice</span>
+                </div>
+                <div className="text-lg font-bold text-gray-900 tracking-wide">{orderData.invoice}</div>
               </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1">Order ID</p>
-                <p className="text-sm font-mono text-gray-800">{orderData.order_id}</p>
+              {/* Divider */}
+              <div className="hidden md:block w-px bg-gray-200 my-4" />
+              {/* Order ID */}
+              <div className="flex-1 flex flex-col justify-center px-6 py-4 min-w-[160px]">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="inline-block w-5 h-5 rounded bg-gray-100 flex items-center justify-center">
+                    <span className="text-[13px] font-bold text-gray-500">#</span>
+                  </span>
+                  <span className="text-xs text-gray-500">Order ID</span>
+                </div>
+                <div className="text-base font-mono font-semibold text-gray-800">{orderData.order_id}</div>
               </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1">Platform</p>
-                <p className="text-sm font-semibold text-gray-800">{orderData.platform}</p>
+              {/* Divider */}
+              <div className="hidden md:block w-px bg-gray-200 my-4" />
+              {/* Platform */}
+              <div className="flex-1 flex flex-col justify-center px-6 py-4 min-w-[120px]">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="inline-block w-5 h-5 rounded bg-gray-100 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M8 20h8" /></svg>
+                  </span>
+                  <span className="text-xs text-gray-500">Platform</span>
+                </div>
+                <div className="text-base font-semibold text-gray-900">{orderData.platform}</div>
+              </div>
+              {/* Divider */}
+              <div className="hidden md:block w-px bg-gray-200 my-4" />
+              {/* Pengiriman */}
+              <div className="flex-1 flex flex-col justify-center px-6 py-4 min-w-[160px]">
+                <div className="flex items-center gap-2 mb-1">
+                  <TruckIcon className="w-5 h-5 text-green-500" />
+                  <span className="text-xs text-gray-500">Pengiriman</span>
+                </div>
+                <div className="text-base font-bold text-gray-900">{orderData.pengiriman || '-'}</div>
+                {orderData.code_pengiriman && (
+                  <div className="text-xs text-gray-600 mt-1">Resi: <span className="font-semibold">{orderData.code_pengiriman}</span></div>
+                )}
+              </div>
+              {/* Divider */}
+              <div className="hidden md:block w-px bg-gray-200 my-4" />
+              {/* Pembayaran */}
+              <div className="flex-1 flex flex-col justify-center px-6 py-4 min-w-[160px]">
+                <div className="flex items-center gap-2 mb-1">
+                  <CreditCardIcon className="w-5 h-5 text-purple-500" />
+                  <span className="text-xs text-gray-500">Pembayaran</span>
+                </div>
+                <div className="text-base font-bold text-gray-900">{orderData.metode_pembayaran || 'Belum dibayar'}</div>
+                {orderData.tgl_pembayaran && (
+                  <div className="text-xs text-gray-600 mt-1">Dibayar: {orderData.tgl_pembayaran}</div>
+                )}
               </div>
             </div>
 
             {/* History removed from here to place at the bottom */}
           </div>
 
-          {/* Customer (Pemesan), Penerima, and Shipping/Payment + History in 3 columns */}
-          <div className="grid md:grid-cols-3 gap-4 mb-6">
-            {/* Informasi Pemesan */}
-            <div className="border border-gray-200 rounded-lg p-4 bg-white">
-              <div className="flex items-center gap-2 mb-3 pb-2 border-b">
-                <UserIcon className="w-5 h-5 text-blue-600" />
-                <h3 className="font-bold text-sm text-gray-800">Informasi Pemesan</h3>
-              </div>
-              <div className="space-y-2">
-                <div>
-                  <p className="text-xs text-gray-500">Nama</p>
-                  <p className="text-sm font-semibold text-gray-900">{orderData.nama_customer || orderData.nama_pemesan || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Email</p>
-                  <p className="text-sm text-gray-700">{orderData.email_customer || orderData.email || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Catatan Pesanan</p>
-                  <p className="text-sm text-gray-800 italic">{orderData.pesan_customer || '-'}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Informasi Penerima */}
-            <div className="border border-gray-200 rounded-lg p-4 bg-white">
-              <div className="flex items-center gap-2 mb-3 pb-2 border-b">
-                <UserIcon className="w-5 h-5 text-blue-600" />
-                <h3 className="font-bold text-sm text-gray-800">Informasi Penerima</h3>
-              </div>
-              <div className="space-y-2">
-                <div>
-                  <p className="text-xs text-gray-500">Nama Penerima</p>
-                  <p className="text-sm font-semibold text-gray-900">{orderData.nama_penerima || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">No. Telepon</p>
-                  <p className="text-sm text-gray-700 flex items-center gap-1">
-                    <PhoneIcon className="w-4 h-4" />
-                    {orderData.telp_penerima || '-'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Alamat Lengkap</p>
-                  <p className="text-sm text-gray-700 leading-relaxed font-semibold">{orderData.alamat_pengiriman || '-'}</p>
-                  {orderData.detail_alamat && (
-                    <div className="mt-1 text-xs text-gray-600 space-y-0.5 border-l-2 border-gray-300 pl-2">
-                      <p>{orderData.detail_alamat.kelurahan}, {orderData.detail_alamat.kecamatan}</p>
-                      <p>{orderData.detail_alamat.kota}</p>
-                      <p>{orderData.detail_alamat.provinsi} - {orderData.detail_alamat.kode_pos}</p>
+          {/* Redesigned: Two-column modern layout */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            {/* Left: Pemesan + Penerima in one card */}
+            <div className="md:col-span-2">
+              <div className="border border-gray-200 rounded-xl bg-white p-6 flex flex-col md:flex-row gap-0 md:gap-8">
+                {/* Informasi Pemesan */}
+                <div className="flex-1 min-w-[220px]">
+                  <div className="flex items-center gap-2 mb-3">
+                    <UserIcon className="w-5 h-5 text-blue-600" />
+                    <h3 className="font-bold text-base text-gray-800">Informasi Pemesan</h3>
+                  </div>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-xs text-gray-500">Nama</p>
+                      <p className="text-sm font-semibold text-gray-900">{orderData.nama_customer || orderData.nama_pemesan || '-'}</p>
                     </div>
-                  )}
+                    <div>
+                      <p className="text-xs text-gray-500">Email</p>
+                      <p className="text-sm text-gray-700">{orderData.email_customer || orderData.email || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Catatan Pesanan</p>
+                      <p className="text-sm text-gray-800 italic">{orderData.pesan_customer || '-'}</p>
+                    </div>
+                  </div>
+                </div>
+                {/* Divider */}
+                <div className="hidden md:block w-px bg-gray-200 mx-8" />
+                {/* Informasi Penerima */}
+                <div className="flex-1 min-w-[220px] mt-6 md:mt-0">
+                  <div className="flex items-center gap-2 mb-3">
+                    <UserIcon className="w-5 h-5 text-blue-600" />
+                    <h3 className="font-bold text-base text-gray-800">Informasi Penerima</h3>
+                  </div>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-xs text-gray-500">Nama Penerima</p>
+                      <p className="text-sm font-semibold text-gray-900">{orderData.nama_penerima || '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">No. Telepon</p>
+                      <p className="text-sm text-gray-700 flex items-center gap-1">
+                        <PhoneIcon className="w-4 h-4" />
+                        {orderData.telp_penerima || '-'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Alamat Lengkap</p>
+                      <p className="text-sm text-gray-700 leading-relaxed font-semibold">{orderData.alamat_pengiriman || '-'}</p>
+                      {orderData.detail_alamat && (
+                        <div className="mt-1 text-xs text-gray-600 space-y-0.5 border-l-2 border-gray-300 pl-2">
+                          <p>{orderData.detail_alamat.kelurahan}, {orderData.detail_alamat.kecamatan}</p>
+                          <p>{orderData.detail_alamat.kota}</p>
+                          <p>{orderData.detail_alamat.provinsi} - {orderData.detail_alamat.kode_pos}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Shipping, Payment, and History stacked */}
-            <div className="space-y-4">
-              <div className="border border-gray-200 rounded-lg p-4 bg-gradient-to-br from-blue-50 to-cyan-50">
-                <div className="flex items-center gap-2 mb-2">
-                  <TruckIcon className="w-5 h-5 text-blue-600" />
-                  <h3 className="font-bold text-sm text-gray-800">Pengiriman</h3>
-                </div>
-                <p className="text-base font-bold text-gray-900">{orderData.pengiriman || '-'}</p>
-                {orderData.code_pengiriman && (
-                  <p className="text-xs text-gray-600 mt-1">Resi: <span className="font-semibold">{orderData.code_pengiriman}</span></p>
-                )}
-              </div>
-
-              <div className="border border-gray-200 rounded-lg p-4 bg-gradient-to-br from-purple-50 to-pink-50">
-                <div className="flex items-center gap-2 mb-2">
-                  <CreditCardIcon className="w-5 h-5 text-purple-600" />
-                  <h3 className="font-bold text-sm text-gray-800">Pembayaran</h3>
-                </div>
-                <p className="text-base font-bold text-gray-900">{orderData.metode_pembayaran || 'Belum dibayar'}</p>
-                {orderData.tgl_pembayaran && (
-                  <p className="text-xs text-gray-600 mt-1">Dibayar: {orderData.tgl_pembayaran}</p>
-                )}
-              </div>
-
-              {/* History Card */}
-              <div className="border border-gray-200 rounded-lg p-4 bg-white">
-                <div className="flex items-center gap-2 mb-2">
+            {/* Right: Only Riwayat Order Timeline remains */}
+            <div className="flex flex-col gap-4">
+              {/* Riwayat Order Timeline */}
+              <div className="border border-gray-200 rounded-xl bg-white p-4">
+                <div className="flex items-center gap-2 mb-3">
                   <ClockIcon className="w-5 h-5 text-gray-600" />
                   <h3 className="font-bold text-sm text-gray-800">Riwayat Order</h3>
                 </div>
-                <div className="space-y-3">
+                <div className="relative pl-4">
+                  {/* Timeline vertical line */}
+                  <div className="absolute left-1.5 top-2 bottom-2 w-0.5 bg-gray-200" />
                   {orderData.history && orderData.history.length > 0 ? (
-                    orderData.history.slice(0, 5).map((h) => (
-                      <div key={h.id_transaksi_history} className="text-sm">
-                        <div className="font-medium text-gray-800">{h.status}</div>
-                        <div className="text-xs text-gray-500">{h.date_created ? new Date(h.date_created).toLocaleString('id-ID') : '-'}</div>
+                    orderData.history.slice(0, 8).map((h, idx) => (
+                      <div key={h.id_transaksi_history || idx} className="mb-4 last:mb-0 flex items-start gap-2 relative">
+                        {/* Dot */}
+                        <span className="w-3 h-3 mt-1 rounded-full bg-blue-400 border-2 border-white shadow" />
+                        <div>
+                          <div className="font-medium text-gray-800 text-xs">{h.status}</div>
+                          <div className="text-xs text-gray-500">{h.date_created ? new Date(h.date_created).toLocaleString('id-ID') : '-'}</div>
+                        </div>
                       </div>
                     ))
                   ) : (

@@ -21,6 +21,8 @@ export function TambahVoucher() {
   const [mulai, setMulai] = useState(null);
   const [berakhir, setBerakhir] = useState(null);
   const [nominalDiskon, setNominalDiskon] = useState('');
+  const [discountType, setDiscountType] = useState('nominal');
+  const [persentaseDiskon, setPersentaseDiskon] = useState('');
   const [minBelanja, setMinBelanja] = useState('0');
   const [maxDiskon, setMaxDiskon] = useState('');
   const [kuotaVoucher, setKuotaVoucher] = useState('');
@@ -45,7 +47,9 @@ export function TambahVoucher() {
   // Handle submit
   const handleSubmit = async () => {
     // Validation
-    if (!judulPromo || !kodePromo || !mulai || !berakhir || !nominalDiskon || !kuotaVoucher) {
+    // require nominal or persentase based on selection
+    const discountValid = (discountType === 'nominal' && nominalDiskon) || (discountType === 'persentase' && persentaseDiskon);
+    if (!judulPromo || !kodePromo || !mulai || !berakhir || !discountValid || !kuotaVoucher) {
       Swal.fire({
         icon: 'warning',
         title: 'Peringatan',
@@ -65,7 +69,13 @@ export function TambahVoucher() {
       formData.append('judul_promo', judulPromo);
       formData.append('mulai', dayjs(mulai).format('YYYY-MM-DD'));
       formData.append('berakhir', dayjs(berakhir).format('YYYY-MM-DD'));
-      formData.append('nominal_diskon', nominalDiskon);
+      // Append discount type and the corresponding discount value
+      formData.append('tipe_diskon', discountType);
+      if (discountType === 'nominal') {
+        formData.append('nominal_diskon', nominalDiskon);
+      } else if (discountType === 'persentase') {
+        formData.append('persentase_diskon', persentaseDiskon);
+      }
       formData.append('min_belanja', minBelanja || '0');
       formData.append('max_diskon', maxDiskon || '');
       formData.append('kuota_voucher', kuotaVoucher);
@@ -246,20 +256,58 @@ export function TambahVoucher() {
                 </Typography>
 
                 <div className="grid grid-cols-3 gap-x-6 gap-y-3">
-                  {/* Nominal Diskon */}
+                  {/* Tipe Diskon */}
                   <div>
                     <label className="text-sm font-medium mb-1 block">
-                      Nominal Diskon <span className="text-red-500">*</span>
+                      Tipe Diskon <span className="text-red-500">*</span>
                     </label>
-                    <Input
+                    <Select
                       size="middle"
-                      type="number"
-                      addonBefore="Rp"
-                      placeholder="50000"
-                      value={nominalDiskon}
-                      onChange={(e) => setNominalDiskon(e.target.value)}
-                    />
+                      className="w-full"
+                      value={discountType}
+                      onChange={(val) => setDiscountType(val)}
+                    >
+                      <Option value="nominal">Nominal</Option>
+                      <Option value="persentase">Persentase</Option>
+                    </Select>
+                    <p className="text-xs text-gray-400 mt-1">
+                      <i>Pilih tipe diskon: nominal atau persentase</i>
+                    </p>
                   </div>
+
+                  {/* Nominal Diskon (shown when nominal selected) */}
+                  {discountType === 'nominal' && (
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">
+                        Nominal Diskon <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        size="middle"
+                        type="number"
+                        addonBefore="Rp"
+                        placeholder="50000"
+                        value={nominalDiskon}
+                        onChange={(e) => setNominalDiskon(e.target.value)}
+                      />
+                    </div>
+                  )}
+
+                  {/* Persentase Diskon (shown when persentase selected) */}
+                  {discountType === 'persentase' && (
+                    <div>
+                      <label className="text-sm font-medium mb-1 block">
+                        Persentase Diskon <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        size="middle"
+                        type="number"
+                        addonAfter="%"
+                        placeholder="10"
+                        value={persentaseDiskon}
+                        onChange={(e) => setPersentaseDiskon(e.target.value)}
+                      />
+                    </div>
+                  )}
 
                   {/* Min Belanja */}
                   <div>

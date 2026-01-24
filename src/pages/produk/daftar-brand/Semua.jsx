@@ -250,7 +250,7 @@ function Semua({ status, search: parentSearch }) {
             <div className="mb-4 w-full mt-4">
                 <div className='mb-5 rounded-lg ring-1 ring-gray-200 overflow-hidden bg-white'>
                     {/* Header (always visible) */}
-                    <div className="px-6 pt-6 pb-4 border-b border-gray-200 flex items-center justify-between">
+                    <div className="px-6 pt-4 pb-3 border-b border-gray-200 flex items-center justify-between">
                         <h2 className="text-xl font-semibold tracking-tight text-gray-900">Daftar Brand</h2>
                         <Button onClick={showModal} className="!h-9 !px-3 !rounded-md !bg-gray-900 !text-white !shadow-none hover:!bg-black/80 flex items-center gap-2">
                             <PlusIcon className="w-4 h-4" /> Usulkan Brand

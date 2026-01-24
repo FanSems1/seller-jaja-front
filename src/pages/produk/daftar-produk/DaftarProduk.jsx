@@ -1,6 +1,7 @@
 import { Card, CardBody } from '@material-tailwind/react';
 import React, { useState } from 'react';
 import Semua from './Semua';
+import { SearchOutlined, PlusOutlined } from '@ant-design/icons';
 import { Select, Input, Button } from "antd";
 import { FunnelIcon } from "@heroicons/react/24/outline";
 
@@ -19,11 +20,11 @@ function DaftarProduk() {
   const [search, setSearch] = useState("");
 
   return (
-    <div className="mb-8">
+    <div className="">
       <Card>
 
         {/* Page header (same style as Pesanan) */}
-        <div className="px-6 pt-6 pb-4">
+          <div className="px-6 pt-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold tracking-tight text-gray-900">Daftar Produk</h1>
@@ -32,10 +33,10 @@ function DaftarProduk() {
         </div>
 
         <CardBody className="p-6">
-          {/* Compact filter row (no blue background) */}
-          <div className="mb-6">
-            <div className="grid grid-cols-12 gap-3 items-center">
-              <div className="col-span-3">
+          {/* Compact filter row (matches Pesanan style) */}
+          <div className="mb-4">
+            <div className="grid md:grid-cols-3 gap-3 items-center">
+              <div>
                 <Select
                   value={filterStatus}
                   className="w-full"
@@ -46,7 +47,7 @@ function DaftarProduk() {
                 />
               </div>
 
-              <div className="col-span-7">
+              <div>
                 <Input
                   placeholder="Cari nama produk, SKU, atau kategori..."
                   className="!h-8 !rounded-md !border-gray-300"
@@ -56,12 +57,12 @@ function DaftarProduk() {
                 />
               </div>
 
-              <div className="col-span-2 flex justify-end">
+              <div className="flex items-center justify-end">
                 <Button
-                  className="!h-8 !px-3 !rounded-md !bg-blue-600 !border-blue-600 !text-white !shadow-none !hover:!bg-blue-600"
+                  className="!h-8 !px-3 !rounded-md !bg-green-600 !border-green-600 !text-white !shadow-none !hover:!bg-green-600 flex items-center gap-2"
                   onClick={() => window.location.href = '/dashboard/produk/tambah-produk'}
                 >
-                  Tambah
+                  <PlusOutlined />Tambah
                 </Button>
               </div>
             </div>

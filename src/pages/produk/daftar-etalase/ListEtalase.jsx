@@ -175,7 +175,7 @@ function ListEtalase({ search: parentSearch }) {
             {loading && <Spin size="large" fullscreen />}
             
             {/* Header */}
-            <div className="px-6 pt-6 pb-4 border-b border-gray-200 flex items-center justify-between">
+            <div className="px-6 pt-4 pb-3 border-b border-gray-200 flex items-center justify-between">
                 <div className="flex-1">
                     <Input.Search
                         placeholder="Cari nama etalase..."

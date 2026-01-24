@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* SweetAlert2 Button Fix - Ensure button text is visible */
+
+
+.swal2-popup button {
+  outline: none !important;
+}
+
+.swal-confirm-btn {
+  background-color: #56b4e6 !important;
+  color: #ffffff !important;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.swal-confirm-btn:hover {
+  background-color: #356978 !important;
+}
+
+.swal-cancel-btn {
+  background-color: #6c757d !important;
+  color: #ffffff !important;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 500;
+  /* margin-right: 8px; */
+  cursor: pointer;
+  margin-left: 12px;
+}
+
+.swal-cancel-btn:hover {
+  background-color: #5a6268 !important;
+}
+

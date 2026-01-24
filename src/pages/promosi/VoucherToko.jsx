@@ -152,18 +152,32 @@ export function VoucherToko() {
       title: 'Diskon',
       key: 'diskon',
       width: '12%',
-      render: (_, record) => (
-        <div className="text-sm">
-          <div className="font-semibold text-orange-600">
-            Rp {parseInt(record.nominal_diskon || 0).toLocaleString('id-ID')}
+      render: (_, record) => {
+        const hasPercent = record.persentase_diskon !== null && record.persentase_diskon !== undefined && String(record.persentase_diskon).trim() !== '';
+        const hasNominal = record.nominal_diskon !== null && record.nominal_diskon !== undefined && String(record.nominal_diskon).trim() !== '';
+
+        return (
+          <div className="text-sm">
+            {hasPercent ? (
+              <div className="font-semibold text-orange-600">
+                {Number(record.persentase_diskon).toLocaleString('id-ID')}%
+              </div>
+            ) : hasNominal ? (
+              <div className="font-semibold text-orange-600">
+                Rp {parseInt(record.nominal_diskon, 10).toLocaleString('id-ID')}
+              </div>
+            ) : (
+              <div className="text-sm text-gray-500">-</div>
+            )}
+
+            {record.min_belanja > 0 && (
+              <div className="text-xs text-gray-500">
+                Min. Rp {parseInt(record.min_belanja, 10).toLocaleString('id-ID')}
+              </div>
+            )}
           </div>
-          {record.min_belanja > 0 && (
-            <div className="text-xs text-gray-500">
-              Min. Rp {parseInt(record.min_belanja).toLocaleString('id-ID')}
-            </div>
-          )}
-        </div>
-      ),
+        );
+      },
     },
     {
       title: 'Kuota',
@@ -215,7 +229,7 @@ export function VoucherToko() {
       <Card>
 
         {/* Page header (same style as Pesanan) */}
-        <div className="px-6 pt-6 pb-4">
+          <div className="px-6 pt-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold tracking-tight text-gray-900">Voucher Toko</h1>
@@ -224,10 +238,10 @@ export function VoucherToko() {
         </div>
 
         <CardBody className="p-6">
-          {/* Compact Filter Row (no heavy background) */}
+          {/* Compact Filter Row (match Pesanan style) */}
           <div className="mb-4">
-            <div className="grid md:grid-cols-5 gap-3 items-center">
-              <div>
+            <div className="grid md:grid-cols-3 gap-3 items-center">
+              <div className="flex gap-2">
                 <Select
                   className="w-full"
                   placeholder="Status"
@@ -240,8 +254,6 @@ export function VoucherToko() {
                     { label: "Nonaktif", value: "Nonaktif" }
                   ]}
                 />
-              </div>
-              <div>
                 <Select
                   className="w-full"
                   placeholder="Kategori"
@@ -255,6 +267,7 @@ export function VoucherToko() {
                   ]}
                 />
               </div>
+
               <div>
                 <RangePicker
                   className="w-full !h-8 !rounded-lg !border-gray-300"
@@ -263,23 +276,22 @@ export function VoucherToko() {
                   placeholder={['Mulai', 'Berakhir']}
                 />
               </div>
-              <div>
+
+              <div className="flex items-center justify-end gap-3">
                 <Input
                   placeholder="Cari judul atau kode promo..."
-                  className="!h-8 !rounded-lg !border-gray-300"
+                  className="!h-8 !rounded-lg !border-gray-300 w-full md:w-72"
                   prefix={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
                   onChange={(e) => handleSearch(e.target.value)}
                   allowClear
                 />
-              </div>
-              <div className="flex items-center justify-end">
                 <Button
                   color="green"
                   variant="gradient"
                   className="flex items-center gap-2 !h-8 !px-3"
                   onClick={() => navigate('/dashboard/promosi/tambah-voucher')}
                 >
-                  <PlusOutlined />Tambah
+                  <PlusOutlined /> Tambah
                 </Button>
               </div>
             </div>

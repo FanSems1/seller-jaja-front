@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { ChevronDownIcon, ChevronUpIcon, ChevronDoubleRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
@@ -21,6 +21,8 @@ import Platinum from "../../assets/sidebar/Platinum.png"
 export function Sidenav({ brandImg, brandName, routes }) {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavColor, sidenavType, openSidenav, miniSidenav } = controller;
+  const location = useLocation();
+  const pathname = location?.pathname || '';
   const [openMenus, setOpenMenus] = useState({});
   const [authUser, setAuthUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -56,10 +58,28 @@ export function Sidenav({ brandImg, brandName, routes }) {
   };
 
   const gradientColors = 'from-[#FBFEFF] via-[#C9F8FF] to-[#C9F8FF]';
+  const activeBgColor = '#06B6D480';
+
+  const titleCase = (str = "") => {
+    return String(str)
+      .toLowerCase()
+      .split(' ')
+      .map(s => s.charAt(0).toUpperCase() + s.slice(1))
+      .join(' ');
+  };
 
 
   return (
     <>
+      <style>{`
+        /* Ensure consistent left alignment of labels by giving the icon a fixed width
+           and a right margin instead of relying on label left-margin which behaved
+           inconsistently across different wrapper structures. Also introduce a
+           shared .sidenav-item wrapper so every icon+label pair has the same layout. */
+        .sidenav-item { display: flex; align-items: center; }
+        .sidenav-icon { width: 28px; flex: none; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; }
+        .sidenav-label { margin-left: 0; display: inline-block; flex: 1; }
+      `}</style>
       {/* Mobile: overlay and off-canvas behavior. Desktop: persistent sidebar */}
       {/* Overlay (only show on small screens when sidenav open) */}
       {openSidenav && (
@@ -135,7 +155,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
                 size="sm"
                 color="blue-gray"
                 variant="text"
-                onClick={() => setMiniSidenav(dispatch, !miniSidenav)}
+                onClick={() => { setMiniSidenav(dispatch, !miniSidenav); setOpenMenus({}); }}
                 aria-label={miniSidenav ? 'Expand sidebar' : 'Minimize sidebar'}
               >
                 <ChevronDoubleRightIcon className={`w-5 h-5 transition-transform ${miniSidenav ? 'rotate-180' : ''}`} />
@@ -160,11 +180,11 @@ export function Sidenav({ brandImg, brandName, routes }) {
           
           {routes.map(({ layout, title, pages }, key) => (
             <ul key={key} className="mb-4 flex flex-col gap-1">
-              {title && (
+                  {title && (
                 <li className="mx-3.5 mt-4 mb-2">
                   {!miniSidenav && (
                     <Typography variant="small" color="dark" className="font-black uppercase opacity-100 ">
-                      {title}
+                      {titleCase(title)}
                     </Typography>
                   )}
                 </li>
@@ -175,17 +195,37 @@ export function Sidenav({ brandImg, brandName, routes }) {
                     <>
                       <div
                         onClick={() => handleToggle(name)}
-                        className="flex bg-white items-center gap-4 px-4 capitalize w-full text-left text-blue-gray-500 cursor-pointer"
-                        style={{ padding: "14px" }}
+                        className="flex bg-white items-center sidenav-item capitalize w-full text-left text-blue-gray-500 cursor-pointer px-4 py-3"
                       >
-                        {icon}
-                        <Typography className="font-medium capitalize text-blue-gray-500">
-                          {name}
-                        </Typography>
-                        {openMenus[name] ? (
-                          <ArrowDownCircleIcon className="w-5 h-5 ml-auto" />
+                        {/* icon + label. When mini, center icon and reduce padding */}
+                        {miniSidenav ? (
+                          <div className={`relative flex items-center justify-center w-full`}> 
+                            {(() => {
+                              const sectionActive = Array.isArray(subPages) && subPages.some(sp => pathname.startsWith(`/${layout}${sp.path}`));
+                              return (
+                                <>
+                                  {sectionActive && (
+                                    <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r-md" style={{ backgroundColor: activeBgColor }} />
+                                  )}
+                                  <div className="p-2">
+                                    <div className="sidenav-icon text-blue-gray-500">{icon}</div>
+                                  </div>
+                                </>
+                              );
+                            })()}
+                          </div>
                         ) : (
-                          <ArrowRightCircleIcon className="w-5 h-5 ml-auto" />
+                          <>
+                            <div className="sidenav-icon text-blue-gray-500">{icon}</div>
+                            <Typography className="sidenav-label font-medium capitalize text-blue-gray-500">
+                              {titleCase(name)}
+                            </Typography>
+                            {openMenus[name] ? (
+                              <ArrowDownCircleIcon className="w-5 h-5 ml-auto" />
+                            ) : (
+                              <ArrowRightCircleIcon className="w-5 h-5 ml-auto" />
+                            )}
+                          </>
                         )}
                       </div>
                       <Collapse open={openMenus[name] || false}>
@@ -202,16 +242,28 @@ export function Sidenav({ brandImg, brandName, routes }) {
                                   <Button
                                     variant="text"
                                     color="blue-gray"
-                                    className={`flex items-center gap-4 ${miniSidenav ? 'justify-center px-0' : 'px-4 capitalize'} ${isActive ? `bg-gradient-to-b ${gradientColors} text-[#56b4e6]` : ""}`}
+                                    className={`flex items-center gap-4 ${miniSidenav ? 'justify-center px-0 py-2' : 'px-4 py-3 capitalize'} ${isActive ? 'text-[#56b4e6]' : ""}`}
+                                    style={isActive ? { backgroundColor: activeBgColor } : undefined}
                                     fullWidth
                                   >
-                                    <div className={`${miniSidenav ? '' : 'pl-9'}`}>
-                                      {!miniSidenav && (
-                                        <Typography className={`font-medium capitalize text-blue-gray-500`}>
-                                          {subPage.name}
+                                    {/* when mini, show a compact active icon background */}
+                                    {miniSidenav ? (
+                                      <div className="relative flex items-center justify-center w-full">
+                                        {isActive && (
+                                          <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r-md" style={{ backgroundColor: activeBgColor }} />
+                                        )}
+                                        <div className="p-2">
+                                          <div className="sidenav-icon">{icon}</div>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center sidenav-item">
+                                        <div className="sidenav-icon" />
+                                        <Typography className={`sidenav-label font-medium text-blue-gray-500`}>
+                                          {titleCase(subPage.name)}
                                         </Typography>
-                                      )}
-                                    </div>
+                                      </div>
+                                    )}
                                   </Button>
                                 )}
                               </NavLink>
@@ -220,7 +272,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
                         </ul>
                       </Collapse>
                     </>
-                  ) : (
+                    ) : (
                     <NavLink to={`/${layout}${path}`} onClick={() => {
                       // Only close the overlay on mobile. Do not auto-minimize on desktop.
                       if (window.innerWidth < 1024) {
@@ -231,17 +283,30 @@ export function Sidenav({ brandImg, brandName, routes }) {
                         <Button
                           variant="text"
                           color="blue-gray"
-                          className={`flex items-center gap-4 ${miniSidenav ? 'justify-center px-0' : 'px-4 capitalize'} ${isActive ? `bg-gradient-to-b ${gradientColors} text-[#56b4e6]` : ""}`}
+                          className={`flex items-center gap-4 ${miniSidenav ? 'justify-center px-0 py-2' : 'px-4 py-3 capitalize'} ${isActive ? 'text-[#56b4e6]' : ""}`}
+                          style={isActive ? { backgroundColor: activeBgColor } : undefined}
                           fullWidth
                         >
 
-                          <Typography className="text-blue-gray-500 font-medium capitalize">
-                            {icon}
-                          </Typography>
-                          {!miniSidenav && (
-                            <Typography className="text-blue-gray-500 font-medium capitalize">
-                              {name}
-                            </Typography>
+                          {/* icon rendering: when mini show compact icon with optional active bg */}
+                          {miniSidenav ? (
+                            <div className="relative flex items-center justify-center w-full">
+                              {isActive && (
+                                <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r-md" style={{ backgroundColor: activeBgColor }} />
+                              )}
+                              <div className="p-2">
+                                <div className={`${isActive ? 'text-[#56b4e6]' : 'text-blue-gray-500'} sidenav-icon`}>{icon}</div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-center sidenav-item">
+                              <div className="sidenav-icon text-blue-gray-500">
+                                {icon}
+                              </div>
+                              <Typography className="sidenav-label text-blue-gray-500 font-medium capitalize">
+                                {titleCase(name)}
+                              </Typography>
+                            </div>
                           )}
                         </Button>
                       )}
@@ -261,7 +326,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
 
 Sidenav.defaultProps = {
   brandImg: "/img/logo-ct.png",
-  brandName: "Jaja Saller",
+  brandName: "Jaja Seller",
 };
 
 Sidenav.propTypes = {

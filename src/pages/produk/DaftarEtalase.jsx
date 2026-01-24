@@ -25,7 +25,7 @@ function DaftarEtalase() {
     <div className="mb-8">
 
       <Card>
-        <div className="px-6 pt-6 pb-4 border-b border-gray-200 flex items-start justify-between">
+  <div className="px-6 pt-4 pb-3 border-b border-gray-200 flex items-start justify-between">
           <div>
             <h1 className="text-xl font-semibold tracking-tight text-gray-900">Daftar Etalase Toko</h1>
             <p className="text-sm text-gray-600">Kelola etalase untuk mengorganisir produk-produk Anda</p>

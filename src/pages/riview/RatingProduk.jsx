@@ -114,7 +114,7 @@ function RatingProduk() {
             <Card>
       
                     {/* Page header (same style as Pesanan) */}
-                    <div className="px-6 pt-6 pb-4">
+                    <div className="px-6 pt-4 pb-3">
                         <div className="flex items-center justify-between">
                             <div>
                                 <h1 className="text-xl font-bold tracking-tight text-gray-900">Rating Produk</h1>
@@ -122,10 +122,10 @@ function RatingProduk() {
                         </div>
                     </div>
 
-                    <CardBody>
+                    <CardBody className="p-6">
                         {/* Toko Stats Section */}
-                        <div className="mb-6">
-                                <div className='w-full flex justify-between items-start gap-8'>
+                        <div className="mb-4">
+                            <div className='w-full flex justify-between items-start gap-8'>
                     {/* Stats Cards - Left Side */}
                     <div className='flex flex-wrap gap-8'>
                         {/* Rating Card */}
@@ -153,7 +153,7 @@ function RatingProduk() {
                         <Input 
                             placeholder='Cari produk...' 
                             prefix={<MagnifyingGlassIcon className="h-4 w-4 text-gray-400" />}
-                            className='h-10 w-64'
+                            className='!h-8 w-64'
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />

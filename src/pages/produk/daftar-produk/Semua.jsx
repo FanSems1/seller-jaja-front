@@ -24,7 +24,7 @@ function Semua({ status, search }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 10;
+    const [pageSize, setPageSize] = useState(10);
     
     useEffect(() => {
         let abort = false;
@@ -75,6 +75,11 @@ function Semua({ status, search }) {
         return filtered.slice(startIndex, endIndex);
     }, [filtered, currentPage, pageSize]);
 
+    // reset page when filters/search change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [status, search]);
+
     const handleEdit = (id) => {
         navigate(`/dashboard/produk/daftar-produk/edit-produk/${id}`);
     };
@@ -121,12 +126,12 @@ function Semua({ status, search }) {
                         </div>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full table-fixed">
+                    <div className="w-full">
+                        <table className="w-full table-auto">
                             <thead className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wide">
                                 <tr>
                                     <th className="px-4 py-3 text-left w-12 sticky top-0 z-10">No.</th>
-                                    <th className="px-4 py-3 text-left w-[28rem] sticky top-0 z-10">Nama Produk</th>
+                                    <th className="px-4 py-3 text-left sticky top-0 z-10">Nama Produk</th>
                                     <th className="px-4 py-3 text-left w-40 sticky top-0 z-10">Kategori</th>
                                     <th className="px-4 py-3 text-left w-36 sticky top-0 z-10">Harga</th>
                                     <th className="px-4 py-3 text-center w-24 sticky top-0 z-10">Stok</th>
@@ -141,22 +146,28 @@ function Semua({ status, search }) {
                                         <td className="px-4 py-3">
                                             <div className='flex items-start gap-3 min-w-0'> 
                                                 <div className='relative w-12 h-12 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden'>
-                                                    {item.thumbnail ? (
-                                                        <img 
-                                                            src={getImageUrl(item.thumbnail)} 
-                                                            alt={item.nama_produk} 
-                                                            className='w-full h-full object-cover'
-                                                            crossOrigin="anonymous"
-                                                            onError={(e) => {
-                                                                e.target.onerror = null;
-                                                                e.target.src = Gambar1;
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <div className='w-full h-full flex items-center justify-center text-[8px] text-gray-400'>
-                                                            No Image
-                                                        </div>
-                                                    )}
+                                                    {(() => {
+                                                        const imageSrc = item.foto_produk || (item.thumbnail ? getImageUrl(item.thumbnail) : null);
+                                                        if (imageSrc) {
+                                                            return (
+                                                                <img
+                                                                    src={imageSrc}
+                                                                    alt={item.nama_produk}
+                                                                    className='w-full h-full object-cover'
+                                                                    crossOrigin="anonymous"
+                                                                    onError={(e) => {
+                                                                        e.target.onerror = null;
+                                                                        e.target.src = Gambar1;
+                                                                    }}
+                                                                />
+                                                            );
+                                                        }
+                                                        return (
+                                                            <div className='w-full h-full flex items-center justify-center text-[8px] text-gray-400'>
+                                                                No Image
+                                                            </div>
+                                                        );
+                                                    })()}
                                                 </div>
                                                 <div className='min-w-0'>
                                                     <div className='text-sm font-medium text-gray-900 leading-snug line-clamp-2 break-words'>
@@ -213,9 +224,14 @@ function Semua({ status, search }) {
                                 current={currentPage}
                                 total={filtered.length}
                                 pageSize={pageSize}
-                                onChange={(page) => setCurrentPage(page)}
-                                showSizeChanger={false}
+                                onChange={(page, newSize) => {
+                                    setCurrentPage(page);
+                                    if (newSize && newSize !== pageSize) setPageSize(newSize);
+                                }}
+                                showSizeChanger={true}
+                                pageSizeOptions={["10", "50", "100"]}
                                 showTotal={(total) => `Total ${total} produk`}
+                                size="small"
                             />
                         </div>
                     </div>

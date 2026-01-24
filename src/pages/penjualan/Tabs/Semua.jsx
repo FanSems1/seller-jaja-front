@@ -15,7 +15,7 @@ import { ORDER_ENDPOINTS, apiFetch } from '../../../configs/api';
 
 const { Step } = Steps;
 
-function Semua({ status, date, search, StatusPill }) {
+function Semua({ status, date, search, StatusPill, statusOptions = [] }) {
 
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -68,11 +68,26 @@ function Semua({ status, date, search, StatusPill }) {
           if (listResp && listResp.success && listResp.data) {
             const transformedOrders = listResp.data.map((order, index) => {
               const firstDetail = order.details?.[0] || {};
+              // helper: find color from provided statusOptions by name or slug
+              const buildStatusObject = (ord) => {
+                if (ord.status && typeof ord.status === 'object') return ord.status;
+                const name = ord.status_transaksi || ord.current_status?.name_status || '';
+                const slug = ord.current_status?.slug_status || '';
+                // try to find in statusOptions
+                const found = statusOptions.find(opt => (String(opt.label || opt.value || '').toLowerCase() === String(name || '').toLowerCase()) || (String(opt.value || '').toLowerCase() === String(slug || '').toLowerCase()));
+                return {
+                  name_status: name || 'Unknown',
+                  slug_status: slug || '',
+                  color: (found && found.color) ? found.color : (ord.current_status?.color || '')
+                };
+              };
+
               return {
-                key: order.id_data || index,
-                invoice: order.invoice || "-",
-                date: `${order.created_date} ${order.created_time}`,
-                status: order.status_transaksi || "Unknown",
+                  key: order.id_data || index,
+                  invoice: order.invoice || "-",
+                  date: `${order.created_date} ${order.created_time}`,
+                  // Prefer the structured status object from API when available
+                  status: buildStatusObject(order),
                 item: {
                   images: firstDetail.foto_produk || Gambar1,
                   productName: firstDetail.nama_produk || "Produk tidak tersedia",
@@ -127,11 +142,23 @@ function Semua({ status, date, search, StatusPill }) {
         if (response.success && response.data) {
           const transformedOrders = response.data.map((order, index) => {
             const firstDetail = order.details?.[0] || {};
+            const buildStatusObject = (ord) => {
+              if (ord.status && typeof ord.status === 'object') return ord.status;
+              const name = ord.status_transaksi || ord.current_status?.name_status || '';
+              const slug = ord.current_status?.slug_status || '';
+              const found = statusOptions.find(opt => (String(opt.label || opt.value || '').toLowerCase() === String(name || '').toLowerCase()) || (String(opt.value || '').toLowerCase() === String(slug || '').toLowerCase()));
+              return {
+                name_status: name || 'Unknown',
+                slug_status: slug || '',
+                color: (found && found.color) ? found.color : (ord.current_status?.color || '')
+              };
+            };
+
             return {
               key: order.id_data || index,
               invoice: order.invoice || "-",
               date: `${order.created_date} ${order.created_time}`,
-              status: order.status_transaksi || "Unknown",
+              status: buildStatusObject(order),
               item: {
                 images: firstDetail.foto_produk || Gambar1,
                 productName: firstDetail.nama_produk || "Produk tidak tersedia",
@@ -176,17 +203,41 @@ function Semua({ status, date, search, StatusPill }) {
   // ==============================
   //   FILTERING LOGIC
   // ==============================
+  const matchesStatus = (orderStatus = "", filterValue = "") => {
+    if (!filterValue) return true;
+    // orderStatus may be an object from API or a plain string
+    const oRaw = (orderStatus && typeof orderStatus === 'object') ? (orderStatus.name_status || orderStatus.slug_status || '') : orderStatus;
+    const o = String(oRaw || "").toLowerCase();
+    const f = String(filterValue || "").toLowerCase();
+
+    // direct includes (handles 'menunggu' vs 'menunggu pembayaran')
+    if (o.includes(f) || f.includes(o)) return true;
+
+    // some common semantic mappings
+    if (f === 'paid' && (o.includes('dibayar') || o.includes('telah dibayar') || o.includes('sudah dibayar'))) return true;
+    if (f === 'dibatalkan' && (o.includes('batal') || o.includes('dibatalkan') || o.includes('refund'))) return true;
+    if (f === 'diproses' && (o.includes('proses') || o.includes('disiapkan'))) return true;
+
+    return false;
+  };
+
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
+      // Filter status (case-insensitive, relaxed matching)
+      if (status && !matchesStatus(order.status, status)) return false;
 
-      // Filter status (case-insensitive)
-      if (status && order.status?.toLowerCase() !== status.toLowerCase()) return false;
-
-      // Filter tanggal (format sama YYYY-MM-DD)
+      // Filter tanggal (support single Moment or range)
       if (date) {
-        const orderDate = order.date.split(" ")[0]; // ambil tanggal saja
-        const selectedDate = date.format("YYYY-MM-DD");
-        if (orderDate !== selectedDate) return false;
+        const orderDate = order.date.split(" ")[0]; // ambil tanggal saja (YYYY-MM-DD)
+        // date might be a moment, or an array [start, end]
+        if (Array.isArray(date) && date.length === 2 && date[0] && date[1]) {
+          const start = date[0].format("YYYY-MM-DD");
+          const end = date[1].format("YYYY-MM-DD");
+          if (orderDate < start || orderDate > end) return false;
+        } else if (date && typeof date.format === 'function') {
+          const selectedDate = date.format("YYYY-MM-DD");
+          if (orderDate !== selectedDate) return false;
+        }
       }
 
       // Filter search invoice OR product
@@ -240,7 +291,7 @@ function Semua({ status, date, search, StatusPill }) {
     };
 
     return (
-      <span className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-[11px] font-semibold border ${base}`}>
+      <span className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-[11px] font-semibold border ${base}`}>
         {/* small static dot for decoration */}
         <span className={`${statusLower === 'paid' || statusLower === 'sudah dibayar' ? 'w-2 h-2 rounded-full bg-white' : 'w-2 h-2 rounded-full bg-current/80'}`} />
         {statusText[statusLower] || status}
@@ -260,10 +311,14 @@ function Semua({ status, date, search, StatusPill }) {
       dataIndex: 'invoice',
       key: 'invoice',
       width: 140,
-      render: (text) => (
-        <span className="inline-flex items-center px-2 py-1 rounded-md bg-green-100 text-green-800 text-[11px] font-medium leading-tight break-all">
+      render: (text, record) => (
+        <button
+          onClick={() => handleDetail(record.key)}
+          className="text-sm font-semibold text-gray-800 hover:underline text-left"
+          style={{ background: 'transparent', border: 'none', padding: 0 }}
+        >
           {text}
-        </span>
+        </button>
       )
     },
     {
@@ -293,7 +348,7 @@ function Semua({ status, date, search, StatusPill }) {
       width: 140,
       render: (_, r) => (
         <div className="text-[10px]">
-          <p className="text-gray-800 font-medium">{r.item.courier}</p>
+          <p className="text-gray-800 font-medium">{String(r.item.courier || '').toUpperCase()}</p>
         </div>
       )
     },
@@ -312,66 +367,15 @@ function Semua({ status, date, search, StatusPill }) {
       width: 150,
       render: (value) => <span className="text-[10px] text-gray-600 whitespace-nowrap">{value}</span>
     },
-    {
-      title: 'Aksi',
-      key: 'aksi',
-      width: 180,
-      render: (_, order) => {
-        const statusLower = (order.status || '').toLowerCase();
-        const isPaid = (s) => {
-          if (!s) return false;
-          const v = String(s).toLowerCase();
-          // Strict check for PAID status (ID 3)
-          // Must NOT show for 'diproses' (ID 5) or 'dikirim' etc.
-          if (v === '3' || v === 'paid' || v.includes('menunggu konfirmasi')) return true;
-          // Legacy strings
-          if (v.includes('sudah dibayar') && !v.includes('dikirim') && !v.includes('selesai')) return true;
-          return false;
-        };
-        const showCheck = isPaid(statusLower);
-
-        return (
-          <div className="flex items-center justify gap-2">
-            <Button onClick={() => handleDetail(order.key)} size="small" type="default" className="!flex !items-center !gap-1 !text-gray-700 !px-2 !h-8 !text-[11px] hover:!border-gray-400">
-              <NewspaperIcon className="w-3 h-3 text-gray-500" />
-              <span className="hidden md:inline">Rincian</span>
-            </Button>
-
-            {showCheck && (
-              <button
-                onClick={() => showKonfirmasiModal(order.key)}
-                title="Terbayar"
-                className="inline-flex items-center justify-center bg-green-600 text-white rounded-full w-5 h-5 p-0"
-              >
-                <CheckIcon className="w-3 h-3" />
-              </button>
-            )}
-
-            {statusLower === "selesai" && (
-              <>
-                <Button size="small" type="default" className="!flex !items-center !gap-1 !text-gray-700 !px-2 !h-8 !text-[11px] hover:!border-gray-400">
-                  <PrinterIcon className="w-3 h-3 text-gray-500" />
-                  <span className="hidden md:inline">Cetak Label</span>
-                </Button>
-                <Button onClick={showModal} size="small" type="default" className="!flex !items-center !gap-1 !text-gray-700 !px-2 !h-8 !text-[11px] hover:!border-gray-400">
-                  <CursorArrowRippleIcon className="w-3 h-3 text-gray-500" />
-                  <span className="hidden md:inline">Lacak</span>
-                </Button>
-              </>
-            )}
-          </div>
-        );
-      }
-    }
   ];
 
   return (
-    <div className="mt-5">
+    <div className="mt-2">
       <style>{`
                 .compact-table .ant-table-thead > tr > th {
-                    padding: 6px 8px !important;
-                    font-size: 10px !important;
-                    font-weight: 600 !important;
+                    padding: 8px 12px !important;
+                    font-size: 13px !important;
+                    font-weight: 700 !important;
                 }
         .compact-table .ant-table-tbody > tr > td {
           padding: 10px 12px !important;
@@ -388,6 +392,12 @@ function Semua({ status, date, search, StatusPill }) {
                 .compact-table .ant-table-thead > tr > th::before {
                     display: none !important;
                 }
+        /* Hide/zero-out Ant's measurement row so it doesn't create visual gap */
+        .compact-table .ant-table-tbody > tr.ant-table-measure-row > td {
+          padding: 0 !important;
+          height: 0 !important;
+          border: 0 !important;
+        }
             `}</style>
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
